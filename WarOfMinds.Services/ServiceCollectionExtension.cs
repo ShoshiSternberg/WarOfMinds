@@ -1,0 +1,31 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using WarOfMinds.Repositories;
+using WarOfMinds.Services.Interfaces;
+using WarOfMinds.Services.Services;
+
+namespace WarOfMinds.Services
+{
+    public static class ServiceCollectionExtension
+    {
+        public static IServiceCollection AddServices(this IServiceCollection services)
+        {
+            services.AddRepositories();
+            services.AddScoped<IGameService, GameService>();            
+            services.AddScoped<IPlayerService, PlayerService>();
+            services.AddScoped<IPlayerRatingBySubjectService, PlayerRatingBySubjectService>();
+            services.AddScoped<ISubjectService, SubjectService>();
+
+            
+            services.AddAutoMapper(typeof(MappingProfile));
+            //מה זה
+            //services.AddMemoryCache();
+
+            return services;
+        }
+    }
+}

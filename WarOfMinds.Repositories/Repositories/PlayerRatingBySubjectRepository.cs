@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using WarOfMinds.Repositories.Entities;
 using WarOfMinds.Repositories.Interfaces;
 
-namespace WarOfMinds.Repositories.Repository
+namespace WarOfMinds.Repositories.Repositories
 {
     public class PlayerRatingBySubjectRepository : IPlayerRatingBySubjectRepository
     {

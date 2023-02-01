@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WarOfMinds.Repositories.Interfaces;
-using WarOfMinds.Repositories.Repository;
+using WarOfMinds.Repositories.Repositories;
 
 namespace WarOfMinds.Repositories
 {
