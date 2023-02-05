@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace WarOfMinds.Repositories.Entities
 {
     public class Subject
     {
+        [Key]
         private int subjectID;
 
         public int SubjectID
@@ -15,8 +17,7 @@ namespace WarOfMinds.Repositories.Entities
             get { return subjectID; }
             set { subjectID = value; }
         }
-
-
+        
         private string subjectName;
 
         public string Subjectname
