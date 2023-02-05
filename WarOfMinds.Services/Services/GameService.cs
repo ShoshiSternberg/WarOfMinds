@@ -44,7 +44,8 @@ namespace WarOfMinds.Services.Services
 
         public async Task<GameDTO> UpdateAsync(GameDTO game)
         {
-            return _mapper.Map<GameDTO>(await _gameRepository.UpdateAsync(_mapper.Map<Game>(game)));    
+            return _mapper.Map<GameDTO>(await _gameRepository.UpdateAsync(_mapper.Map<Game>(game)));
         }
+       
     }
 }
