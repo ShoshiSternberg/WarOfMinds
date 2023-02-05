@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,14 +16,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WarOfMinds.Common\WarOfMinds.Common.csproj" />
-    <ProjectReference Include="..\WarOfMinds.Context\WarOfMinds.Context.csproj" />
     <ProjectReference Include="..\WarOfMinds.Repositories\WarOfMinds.Repositories.csproj" />
-    <ProjectReference Include="..\WarOfMinds.Services\WarOfMinds.Services.csproj" />
   </ItemGroup>
 
 </Project>

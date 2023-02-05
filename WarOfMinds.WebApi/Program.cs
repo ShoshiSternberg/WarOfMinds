@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using WarOfMinds.Context;
+using WarOfMinds.Repositories;
 using WarOfMinds.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +14,8 @@ builder.Services.AddSwaggerGen();
 
 //my injections!
 builder.Services.AddServices();
+builder.Services.AddDbContext<IContext, DataContext>(options => options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
