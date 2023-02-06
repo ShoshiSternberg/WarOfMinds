@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using WarOfMinds.Context;
 using WarOfMinds.Repositories;
 using WarOfMinds.Services;
+using WarOfMinds.WebApi.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,7 @@ builder.Services.AddSwaggerGen();
 //my injections!
 builder.Services.AddServices();
 builder.Services.AddDbContext<IContext, DataContext>(options => options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB"));
-
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,7 +29,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
+app.MapHub<TriviaHub>("/TriviaHub");
 app.MapControllers();
 
 app.Run();

@@ -50,7 +50,16 @@ namespace WarOfMinds.Repositories.Entities
             get { return gameManager; }
             set { gameManager = value; }
         }
-         
+
+        private bool isActive;
+
+        public bool IsActive
+        {
+            get { return isActive; }
+            set { isActive = value; }
+        }
+
+
         public virtual ICollection<Player> Players { get; set; }
     }
 }

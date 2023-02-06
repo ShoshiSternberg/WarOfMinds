@@ -47,5 +47,15 @@ namespace WarOfMinds.Repositories.Repositories
             await _context.SaveChangesAsync();
             return updatedGame.Entity;
         }
+
+        public async Task<Game> GetCurrentGame(Subject subject)
+        {
+            Game game= _context.Games.
+                Where(g => g.Subject.SubjectID == subject.SubjectID && g.IsActive)
+                .FirstOrDefault();
+            return game;
+            
+        }
+        
     }
 }
