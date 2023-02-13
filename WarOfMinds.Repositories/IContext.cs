@@ -8,7 +8,7 @@ using WarOfMinds.Repositories.Entities;
 
 namespace WarOfMinds.Repositories
 {
-    public interface IContext
+    public interface IContext 
     {
         DbSet<Game> Games { get; set; }
         

@@ -39,6 +39,9 @@ namespace WarOfMinds.Context.Migrations
                     b.Property<int>("GameManagerPlayerID")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<int>("SubjectID")
                         .HasColumnType("int");
 

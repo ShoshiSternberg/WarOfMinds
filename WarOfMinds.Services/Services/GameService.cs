@@ -47,17 +47,17 @@ namespace WarOfMinds.Services.Services
             return _mapper.Map<GameDTO>(await _gameRepository.UpdateAsync(_mapper.Map<Game>(game)));
         }
 
-        public async GameDTO AddPlayerToGame(Player player)
-        {
+        //public async GameDTO AddPlayerToGame(Player player)
+        //{
             
-        }
+        //}
 
-        public Game GetCurrentGame(string subject)
-        {
-            return _context.Games
-                .Where(g => g.Subject == subject && g.IsActive)
-                .FirstOrDefault();
-        }
+        //public Game GetCurrentGame(string subject)
+        //{
+        //    return _context.Games
+        //        .Where(g => g.Subject == subject && g.IsActive)
+        //        .FirstOrDefault();
+        //}
 
 
     }

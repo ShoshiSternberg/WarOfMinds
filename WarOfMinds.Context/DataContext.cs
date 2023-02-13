@@ -11,6 +11,7 @@ namespace WarOfMinds.Context
 {
     public class DataContext : DbContext, IContext
     {
+        
         public DbSet<Game> Games { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<PlayerRatingBySubject> PlayerRatingsBySubject { get; set; }
