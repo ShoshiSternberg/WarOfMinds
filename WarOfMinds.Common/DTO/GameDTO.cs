@@ -16,13 +16,13 @@ namespace WarOfMinds.Common.DTO
             set { gameID = value; }
         }
 
-        //private int subject;
+        private SubjectDTO subject;
 
-        //public int Subject
-        //{
-        //    get { return subject; }
-        //    set { subject = value; }
-        //}
+        public SubjectDTO Subject
+        {
+            get { return subject; }
+            set { subject = value; }
+        }
 
         private DateTime gameDate;
 
@@ -41,13 +41,13 @@ namespace WarOfMinds.Common.DTO
             set { gameLength = value; }
         }
 
-        //private int gameManager;
+        private PlayerDTO gameManager;
 
-        //public int GameManager
-        //{
-        //    get { return gameManager; }
-        //    set { gameManager = value; }
-        //}
+        public PlayerDTO GameManager
+        {
+            get { return gameManager; }
+            set { gameManager = value; }
+        }
 
         private bool isActive;
 

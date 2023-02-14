@@ -41,7 +41,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthorization();
-app.MapHub<TriviaHub>("/TriviaHub");
+app.MapHub<TriviaHub>("/SignalR/TriviaHub");
 app.MapControllers();
 
 app.Run();
