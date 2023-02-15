@@ -57,7 +57,15 @@ namespace WarOfMinds.Common.DTO
             set { isActive = value; }
         }
 
+        private int rating;
 
+        public int Rating
+        {
+            get { return rating; }
+            set { rating = value; }
+        }
+
+        public virtual ICollection<PlayerDTO> Players { get; set; }
 
     }
 }

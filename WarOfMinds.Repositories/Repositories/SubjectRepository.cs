@@ -40,6 +40,7 @@ namespace WarOfMinds.Repositories.Repositories
         {
             return await _context.Subjects.FindAsync(id);
         }
+       
 
         public async Task<Subject> UpdateAsync(Subject subject)
         {

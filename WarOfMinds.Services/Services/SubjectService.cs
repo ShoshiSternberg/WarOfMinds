@@ -41,6 +41,11 @@ namespace WarOfMinds.Services.Services
             return _mapper.Map<SubjectDTO>(await _subjectRepository.GetByIdAsync(id));
 
         }
+        
+        public async Task<SubjectDTO> GetByNameAsync(string subject)
+        {
+            return GetAllAsync().Result.Where(s => s.Subjectname == subject).FirstOrDefault();
+        }
 
         public async Task<SubjectDTO> UpdateAsync(SubjectDTO Subject)
         {
