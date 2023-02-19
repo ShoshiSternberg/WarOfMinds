@@ -42,6 +42,9 @@ namespace WarOfMinds.Context.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
                     b.Property<int>("SubjectID")
                         .HasColumnType("int");
 
