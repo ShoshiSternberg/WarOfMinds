@@ -27,8 +27,13 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddServices();
-builder.Services.AddDbContext<IContext, DataContext>(options => options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB"));
+//builder.Services.AddDbContext<IContext, DataContext>(options => options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB"));
 builder.Services.AddSignalR();
+builder.Services.AddDbContext<IContext, DataContext>(options =>
+{
+    options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB");
+    //options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

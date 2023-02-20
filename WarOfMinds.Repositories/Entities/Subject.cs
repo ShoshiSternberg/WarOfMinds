@@ -20,7 +20,7 @@ namespace WarOfMinds.Repositories.Entities
         
         private string subjectName;
 
-        public string Subjectname
+        public string SubjectName
         {
             get { return subjectName; }
             set { subjectName = value; }

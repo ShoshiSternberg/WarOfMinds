@@ -48,8 +48,9 @@ namespace WarOfMinds.Services.Services
 
         }
 
-        public async Task<GameDTO> UpdateAsync(GameDTO game)
+        public async Task<GameDTO> UpdateAsync(int id,GameDTO game)
         {
+            game.GameID=id;
             return _mapper.Map<GameDTO>(await _gameRepository.UpdateAsync(_mapper.Map<Game>(game)));
         }
 
@@ -70,9 +71,12 @@ namespace WarOfMinds.Services.Services
 
         public async Task<GameDTO> GetActiveGameBySubjectAndRatingAsync(int subjectID, int rating)
         {
+
             return GetAllAsync().Result
                 .Where(g => g.Subject.SubjectID == subjectID && g.IsActive && CheckRating(g.Rating, rating))
                 .FirstOrDefault();
+
+
 
         }
 
@@ -88,7 +92,7 @@ namespace WarOfMinds.Services.Services
                 game = new GameDTO
                 {
                     Subject = subject,
-                    GameManager = player,
+                    //GameManager = player,
                     GameDate = DateTime.Now,
                     GameLength = 30,
                     IsActive = true,
@@ -104,11 +108,11 @@ namespace WarOfMinds.Services.Services
                 // Add player to existing game
                 game.Players.Add(player);
 
-                await UpdateAsync(game);
+                await UpdateAsync(game.GameID,game);
 
             }
             return game;
-            
+
         }
 
         public async Task UpdateRating(GameDTO game, int newPlayerRating)
@@ -118,7 +122,7 @@ namespace WarOfMinds.Services.Services
                 //ממוצע של דירוגי השחקנים
                 int NumOfPlayers = game.Players.Count;
                 game.Rating = (game.Rating + newPlayerRating) / NumOfPlayers + 1;
-                await UpdateAsync(game);
+                await UpdateAsync(game.GameID,game);
             }
             catch (Exception ex)
             {

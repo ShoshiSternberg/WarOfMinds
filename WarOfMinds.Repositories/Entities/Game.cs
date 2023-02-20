@@ -9,6 +9,10 @@ namespace WarOfMinds.Repositories.Entities
 {
     public class Game
     {
+        public Game()
+        {
+            this.Players = new HashSet<Player>();
+        }
         [Key]
         private int gameID;
 
@@ -43,13 +47,13 @@ namespace WarOfMinds.Repositories.Entities
             set { gameLength = value; }
         }
 
-        private Player gameManager;
+        //private Player gameManager;
 
-        public Player GameManager
-        {
-            get { return gameManager; }
-            set { gameManager = value; }
-        }
+        //public Player GameManager
+        //{
+        //    get { return gameManager; }
+        //    set { gameManager = value; }
+        //}
 
         private bool isActive;
 

@@ -12,8 +12,10 @@ namespace WarOfMinds.Services.Interfaces
         Task<List<GameDTO>> GetAllAsync();
         Task<GameDTO> GetByIdAsync(int id);
         Task<GameDTO> AddAsync(GameDTO game);
-        Task<GameDTO> UpdateAsync(GameDTO game);
+        Task<GameDTO> UpdateAsync(int id,GameDTO game);
         Task DeleteByIdAsync(int id);
-
+        Task<GameDTO> FindGameAsync(SubjectDTO subject, PlayerDTO player);
+        Task<GameDTO> GetActiveGameBySubjectAndRatingAsync(int subjectID, int rating);
     }
+        
 }

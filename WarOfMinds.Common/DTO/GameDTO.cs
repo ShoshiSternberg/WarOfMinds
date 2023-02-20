@@ -41,13 +41,7 @@ namespace WarOfMinds.Common.DTO
             set { gameLength = value; }
         }
 
-        private PlayerDTO gameManager;
 
-        public PlayerDTO GameManager
-        {
-            get { return gameManager; }
-            set { gameManager = value; }
-        }
 
         private bool isActive;
 

@@ -41,8 +41,9 @@ namespace WarOfMinds.WebApi.Controllers
 
         // PUT api/<GameController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public Task<GameDTO> Put(int id, [FromBody] GameDTO game)
         {
+            return _gameService.UpdateAsync(id,game);
         }
 
         // DELETE api/<GameController>/5

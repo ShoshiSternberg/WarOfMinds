@@ -2,7 +2,7 @@
 {
     public class AnswerResult
     {
-        public int Score { get; set; }
+        public bool Score { get; set; }
         public TimeSpan AnswerTime { get; set; }
 
         public bool IsCorrect(int answerId, int playerAnswer)

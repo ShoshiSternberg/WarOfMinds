@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WarOfMinds.Context;
 
@@ -11,9 +12,11 @@ using WarOfMinds.Context;
 namespace WarOfMinds.Context.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230220094919_create_db_3")]
+    partial class createdb3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace WarOfMinds.Context.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("GamePlayer", b =>
-                {
-                    b.Property<int>("GamesGameID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlayersPlayerID")
-                        .HasColumnType("int");
-
-                    b.HasKey("GamesGameID", "PlayersPlayerID");
-
-                    b.HasIndex("PlayersPlayerID");
-
-                    b.ToTable("GamePlayer");
-                });
 
             modelBuilder.Entity("WarOfMinds.Repositories.Entities.Game", b =>
                 {
@@ -57,7 +45,12 @@ namespace WarOfMinds.Context.Migrations
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
+                    b.Property<int>("SubjectID")
+                        .HasColumnType("int");
+
                     b.HasKey("GameID");
+
+                    b.HasIndex("SubjectID");
 
                     b.ToTable("Games");
                 });
@@ -76,6 +69,9 @@ namespace WarOfMinds.Context.Migrations
                     b.Property<int>("ELORating")
                         .HasColumnType("int");
 
+                    b.Property<int?>("GameID")
+                        .HasColumnType("int");
+
                     b.Property<string>("PlayerName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -85,6 +81,8 @@ namespace WarOfMinds.Context.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("PlayerID");
+
+                    b.HasIndex("GameID");
 
                     b.ToTable("Players");
                 });
@@ -113,7 +111,10 @@ namespace WarOfMinds.Context.Migrations
             modelBuilder.Entity("WarOfMinds.Repositories.Entities.Subject", b =>
                 {
                     b.Property<int>("SubjectID")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubjectID"));
 
                     b.Property<int>("DifficultyLevel")
                         .HasColumnType("int");
@@ -127,19 +128,22 @@ namespace WarOfMinds.Context.Migrations
                     b.ToTable("Subjects");
                 });
 
-            modelBuilder.Entity("GamePlayer", b =>
+            modelBuilder.Entity("WarOfMinds.Repositories.Entities.Game", b =>
                 {
-                    b.HasOne("WarOfMinds.Repositories.Entities.Game", null)
+                    b.HasOne("WarOfMinds.Repositories.Entities.Subject", "Subject")
                         .WithMany()
-                        .HasForeignKey("GamesGameID")
+                        .HasForeignKey("SubjectID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WarOfMinds.Repositories.Entities.Player", null)
-                        .WithMany()
-                        .HasForeignKey("PlayersPlayerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Subject");
+                });
+
+            modelBuilder.Entity("WarOfMinds.Repositories.Entities.Player", b =>
+                {
+                    b.HasOne("WarOfMinds.Repositories.Entities.Game", null)
+                        .WithMany("Players")
+                        .HasForeignKey("GameID");
                 });
 
             modelBuilder.Entity("WarOfMinds.Repositories.Entities.PlayerRatingBySubject", b =>
@@ -153,19 +157,9 @@ namespace WarOfMinds.Context.Migrations
                     b.Navigation("Subject");
                 });
 
-            modelBuilder.Entity("WarOfMinds.Repositories.Entities.Subject", b =>
-                {
-                    b.HasOne("WarOfMinds.Repositories.Entities.Game", null)
-                        .WithOne("Subject")
-                        .HasForeignKey("WarOfMinds.Repositories.Entities.Subject", "SubjectID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("WarOfMinds.Repositories.Entities.Game", b =>
                 {
-                    b.Navigation("Subject")                    
-                        .IsRequired();
+                    b.Navigation("Players");
                 });
 #pragma warning restore 612, 618
         }

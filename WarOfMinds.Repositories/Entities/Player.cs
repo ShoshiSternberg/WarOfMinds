@@ -9,6 +9,10 @@ namespace WarOfMinds.Repositories.Entities
 {
     public class Player
     {
+        public Player()
+        {
+            this.Games = new HashSet<Game>();
+        }
         [Key]
         private int playerID;
 
@@ -50,6 +54,6 @@ namespace WarOfMinds.Repositories.Entities
             set { eloRating = value; }
         }
 
-        public virtual ICollection<PlayerRatingBySubject> RatingsBySubjects { get; set; }
+        public virtual ICollection<Game> Games { get; set; }
     }
 }

@@ -48,5 +48,7 @@ namespace WarOfMinds.Common.DTO
             set { eloRating = value; }
         }
 
+        public virtual ICollection<GameDTO> Games { get; set; }
+
     }
 }
