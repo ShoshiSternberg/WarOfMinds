@@ -13,6 +13,7 @@ namespace WarOfMinds.Repositories.Entities
         {
             this.Players = new HashSet<Player>();
         }
+
         [Key]
         private int gameID;
 
@@ -20,14 +21,17 @@ namespace WarOfMinds.Repositories.Entities
         {
             get { return gameID; }
             set { gameID = value; }
-        }
-
-        private Subject subject;
+        } 
+        
+        private Subject? subject;
 
         public Subject Subject
         {
             get { return subject; }
-            set { subject = value; }
+            set {
+                subject = null!;
+                subject = value;
+            }
         }
 
         private DateTime gameDate;

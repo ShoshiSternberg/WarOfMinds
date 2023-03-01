@@ -27,15 +27,15 @@ namespace WarOfMinds.WebApi.SignalR
 
         public async Task JoinGameAsync(int playerId, int subjectId)
         {
-            var player = await _playerService.GetByIdAsync(playerId);
-            var subject = await _subjectService.GetByIdAsync(subjectId);
-            var game = await _gameService.FindGameAsync(subject, player);
+            PlayerDTO player = await _playerService.GetByIdAsync(playerId);
+            SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
+            GameDTO game = await _gameService.FindGameAsync(subject, player);
 
             // Add player to game's SignalR group
             await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{subjectId}");
 
             // Send a message to the group
-            await Clients.Group($"game_{subjectId}").SendAsync("ReceiveMessage", "my app", $"player {playerId} has joined the game{subjectId}.");
+            await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} has joined the game{game.GameID} in subject {subject.Subjectname}.");
         }
         
         //public async Task JoinGameAsync(int playerId, int subjectId, CancellationToken cancellationToken)

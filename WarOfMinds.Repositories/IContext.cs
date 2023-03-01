@@ -12,8 +12,7 @@ namespace WarOfMinds.Repositories
     {
         DbSet<Game> Games { get; set; }
         
-        DbSet<Player> Players { get; set; }
-        DbSet<PlayerRatingBySubject> PlayerRatingsBySubject { get; set; }
+        DbSet<Player> Players { get; set; }        
 
         DbSet<Subject> Subjects { get; set; }
 

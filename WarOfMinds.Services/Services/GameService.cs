@@ -31,6 +31,15 @@ namespace WarOfMinds.Services.Services
         {
             return _mapper.Map<GameDTO>(await _gameRepository.AddAsync(_mapper.Map<Game>(game)));
         }
+        
+        public async Task<GameDTO> AddGameAsync(GameDTO game)
+        {
+            if (game.Subject == null)
+            {
+                game.Subject =await _subjectService.GetByIdAsync(game.SubjectID);
+            }
+            return _mapper.Map<GameDTO>(await _gameRepository.AddGameAsync(_mapper.Map<Game>(game)));
+        }
 
         public async Task DeleteByIdAsync(int id)
         {
@@ -53,11 +62,13 @@ namespace WarOfMinds.Services.Services
             game.GameID=id;
             return _mapper.Map<GameDTO>(await _gameRepository.UpdateAsync(_mapper.Map<Game>(game)));
         }
+        
+        public async Task<GameDTO> UpdateGameAsync(int id,GameDTO game)
+        {
+            game.GameID=id;
+            return _mapper.Map<GameDTO>(await _gameRepository.UpdateGameAsync(_mapper.Map<Game>(game)));
+        }
 
-        //public async GameDTO AddPlayerToGame(Player player)
-        //{
-
-        //}
 
         public bool CheckRating(int gameRating, int playerRating)
         {
@@ -73,7 +84,7 @@ namespace WarOfMinds.Services.Services
         {
 
             return GetAllAsync().Result
-                .Where(g => g.Subject.SubjectID == subjectID && g.IsActive && CheckRating(g.Rating, rating))
+                .Where(g => g.SubjectID == subjectID && g.IsActive && CheckRating(g.Rating, rating))
                 .FirstOrDefault();
 
 
@@ -99,7 +110,7 @@ namespace WarOfMinds.Services.Services
                     Rating = player.ELORating,
                     Players = new List<PlayerDTO> { player }
                 };
-                await AddAsync(game);
+                return await AddGameAsync(game);
             }
             else
             {
@@ -107,11 +118,10 @@ namespace WarOfMinds.Services.Services
                 game.IsActive = true;
                 // Add player to existing game
                 game.Players.Add(player);
-
-                await UpdateAsync(game.GameID,game);
-
+                
+                return await UpdateGameAsync(game.GameID, game);
             }
-            return game;
+            
 
         }
 

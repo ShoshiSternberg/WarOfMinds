@@ -36,7 +36,7 @@ namespace WarOfMinds.WebApi.Controllers
         [HttpPost]
         public async Task<GameDTO> Post([FromBody] GameDTO game)
         {
-            return await _gameService.AddAsync(game);
+            return await _gameService.AddGameAsync(game);
         }
 
         // PUT api/<GameController>/5

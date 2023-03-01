@@ -16,7 +16,7 @@ namespace WarOfMinds.Services
         {
             CreateMap<GameDTO, Game>().ReverseMap();
             CreateMap<PlayerDTO, Player>().ReverseMap();
-            CreateMap<PlayerRatingBySubjectDTO, PlayerRatingBySubject>().ReverseMap();
+            
             CreateMap<SubjectDTO, Subject>().ReverseMap();
         }
     }

@@ -49,16 +49,93 @@ namespace WarOfMinds.Repositories.Repositories
             return updatedGame.Entity;
         }
 
-
-        public async bool AddPlayerToGame(Player player)
-        {
-             await _playerRepository.GetByIdAsync(player.PlayerID);
-            Player p = await GetByIdAsync(player.PlayerID).Result;
-            if ( p!=null)
+        public async Task<Game> AddGameAsync(Game game)
+        {  
+            if (game.Subject != null)
             {
+                // attach the subject to the context
+                _context.Subjects.Attach(game.Subject);
+            }
+            // attach each player to the context
+            foreach (var player in game.Players)
+            {
+                if (player != null)
+                {
+                    _context.Players.Attach(player);
+                }
+            }
+            
+            // add the game to the context
+            var addedGame = await _context.Games.AddAsync(game);
+            await _context.SaveChangesAsync();
+            return addedGame.Entity;            
+        }
+
+        public async Task<Game> UpdateGameAsync(Game game)
+        {
+            try
+            {
+                // Get the game to update
+                Game gameToUpdate = _context.Games.Include(g => g.Players).FirstOrDefault(g => g.GameID == game.GameID);
+
+                if (gameToUpdate != null)
+                {
+                    // Update the game properties
+                    gameToUpdate.GameDate = game.GameDate;
+                    gameToUpdate.GameLength = game.GameLength;
+                    gameToUpdate.Rating = game.Rating;
+
+                    // Get the subject
+                    Subject subject = _context.Subjects.FirstOrDefault(s => s.SubjectID == game.Subject.SubjectID);
+
+                    if (subject != null)
+                    {
+                        // Update the game's subject
+                        gameToUpdate.Subject = subject;
+                    }
+
+                    // Add new players to the game
+                    foreach (Player p1 in game.Players)
+                    {
+                        // Check if the player exists in the database
+                        Player player = _context.Players.FirstOrDefault(p => p.PlayerID == p1.PlayerID);
+
+                        if (player != null)
+                        {
+                            // Player exists in the database, attach it to the context
+                            _context.Players.Attach(player);
+                        }
+                        else
+                        {
+                            // Player doesn't exist in the database, add player to the context
+
+                            _context.Players.Add(p1);
+                        }
+
+                        // Add the player to the game if it's not already added
+                        if (!gameToUpdate.Players.Contains(player))
+                        {
+                            gameToUpdate.Players.Add(player);
+                        }
+                    }
+
+                    var updatedGame = _context.Games.Update(game);
+                    await _context.SaveChangesAsync();
+                    return updatedGame.Entity;
+                }
+                else
+                {
+                   return await AddAsync(gameToUpdate);
+                }
 
             }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
         }
+        
         public async Task<Game> GetCurrentGame(Subject subject)
         {
 

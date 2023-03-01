@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,9 +17,18 @@ namespace WarOfMinds.Common.DTO
             set { gameID = value; }
         }
 
-        private SubjectDTO subject;
+        [Required]
+        private int subjectID;
 
-        public SubjectDTO Subject
+        public int SubjectID
+        {
+            get { return subjectID; }
+            set { subjectID = value; }
+        }
+        
+        private SubjectDTO? subject;
+
+        public SubjectDTO? Subject
         {
             get { return subject; }
             set { subject = value; }
@@ -40,9 +50,6 @@ namespace WarOfMinds.Common.DTO
             get { return gameLength; }
             set { gameLength = value; }
         }
-
-
-
         private bool isActive;
 
         public bool IsActive

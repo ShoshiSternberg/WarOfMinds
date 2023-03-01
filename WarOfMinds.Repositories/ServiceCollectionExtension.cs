@@ -14,7 +14,7 @@ namespace WarOfMinds.Repositories
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IGameRepository, GameRepository>();
-            services.AddScoped<IPlayerRatingBySubjectRepository, PlayerRatingBySubjectRepository>();
+            
             services.AddScoped<IPlayerRepository, PlayerRepository>();
             services.AddScoped<ISubjectRepository, SubjectRepository>();
             return services;

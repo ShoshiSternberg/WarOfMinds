@@ -17,7 +17,7 @@ namespace WarOfMinds.Services
             services.AddRepositories();
             services.AddScoped<IGameService, GameService>();            
             services.AddScoped<IPlayerService, PlayerService>();
-            services.AddScoped<IPlayerRatingBySubjectService, PlayerRatingBySubjectService>();
+            
             services.AddScoped<ISubjectService, SubjectService>();
 
             
