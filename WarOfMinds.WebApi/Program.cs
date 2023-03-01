@@ -33,6 +33,7 @@ builder.Services.AddDbContext<IContext, DataContext>(options =>
 {
     options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB");
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
 });
 var app = builder.Build();
 

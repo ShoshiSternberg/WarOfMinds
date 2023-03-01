@@ -32,7 +32,7 @@ namespace WarOfMinds.WebApi.SignalR
             GameDTO game = await _gameService.FindGameAsync(subject, player);
 
             // Add player to game's SignalR group
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{subjectId}");
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{game.GameID}");
 
             // Send a message to the group
             await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} has joined the game{game.GameID} in subject {subject.Subjectname}.");

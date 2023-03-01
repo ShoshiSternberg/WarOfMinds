@@ -37,9 +37,13 @@ namespace WarOfMinds.Repositories.Repositories
             return await _context.Games.ToListAsync();
         }
 
+        //public async Task<Game> GetByIdAsync(int id)
+        //{
+        //    return await _context.Games.FindAsync(id);
+        //}
         public async Task<Game> GetByIdAsync(int id)
         {
-            return await _context.Games.FindAsync(id);
+            return await _context.Games.Include(g => g.Subject).FirstOrDefaultAsync(g => g.GameID == id);
         }
 
         public async Task<Game> UpdateAsync(Game game)
@@ -84,14 +88,16 @@ namespace WarOfMinds.Repositories.Repositories
                     gameToUpdate.GameDate = game.GameDate;
                     gameToUpdate.GameLength = game.GameLength;
                     gameToUpdate.Rating = game.Rating;
+                    gameToUpdate.IsActive = game.IsActive;
 
                     // Get the subject
-                    Subject subject = _context.Subjects.FirstOrDefault(s => s.SubjectID == game.Subject.SubjectID);
+                    Subject subject = _context.Subjects.FirstOrDefault(s => s.SubjectID == game.SubjectID);
 
                     if (subject != null)
                     {
                         // Update the game's subject
                         gameToUpdate.Subject = subject;
+                        _context.Subjects.Attach(subject);
                     }
 
                     // Add new players to the game

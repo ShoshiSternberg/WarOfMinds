@@ -23,7 +23,7 @@ namespace WarOfMinds.Services.Services
         {
             _gameRepository = gameRepository;
             _mapper = mapper;
-            //זה מה שצריך לעשות?
+           
             _subjectService = subjectService;
         }
 
@@ -48,7 +48,8 @@ namespace WarOfMinds.Services.Services
 
         public async Task<List<GameDTO>> GetAllAsync()
         {
-            return _mapper.Map<List<GameDTO>>(await _gameRepository.GetAllAsync());
+            var ans= _mapper.Map<List<GameDTO>>(await _gameRepository.GetAllAsync());
+            return ans;
         }
 
         public async Task<GameDTO> GetByIdAsync(int id)

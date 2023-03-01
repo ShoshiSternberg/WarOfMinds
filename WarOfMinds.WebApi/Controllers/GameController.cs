@@ -27,9 +27,9 @@ namespace WarOfMinds.WebApi.Controllers
 
         // GET api/<GameController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<GameDTO> Get(int id)
         {
-            return "value";
+            return await _gameService.GetByIdAsync(id);
         }
 
         // POST api/<GameController>
