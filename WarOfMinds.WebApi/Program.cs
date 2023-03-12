@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using WarOfMinds.Common.DTO;
 using WarOfMinds.Context;
 using WarOfMinds.Repositories;
 using WarOfMinds.Services;
@@ -29,6 +30,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddServices();
 //builder.Services.AddDbContext<IContext, DataContext>(options => options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB"));
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<IDictionary<string, PlayerDTO>>(opts => new Dictionary<string, PlayerDTO>());
 builder.Services.AddDbContext<IContext, DataContext>(options =>
 {
     options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB");

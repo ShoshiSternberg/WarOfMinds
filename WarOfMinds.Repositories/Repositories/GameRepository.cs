@@ -35,7 +35,7 @@ namespace WarOfMinds.Repositories.Repositories
 
         public async Task<List<Game>> GetAllAsync()
         {
-            return await _context.Games.Include(g=>g.Subject).ToListAsync();
+            return await _context.Games.Include(g=>g.Subject).Include(g=>g.Players).ToListAsync();
         }
 
         public async Task<Game> GetByIdAsync(int id)
@@ -116,20 +116,19 @@ namespace WarOfMinds.Repositories.Repositories
                         }
 
                         // Add the player to the game if it's not already added
-                        if (!gameToUpdate.Players.Contains(player))
+                        if (gameToUpdate.Players.FirstOrDefault(p=>p.PlayerID==player.PlayerID)==null)
                         {
                             gameToUpdate.Players.Add(player);
                         }
                     }
 
                     // Update the game in the context
-                    var updatedGame = _context.Games.Update(gameToUpdate);
-
+                    var updatedGame = _context.Games.(gameToUpdate);
                     // Save changes to the database
-                    await _context.SaveChangesAsync();
+                    var t = await _context.SaveChangesAsync();
 
                     // Return the updated game
-                    return updatedGame.Entity;
+                    return gameToUpdate;
                 }
                 else
                 {

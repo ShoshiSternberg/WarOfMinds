@@ -23,7 +23,7 @@ namespace WarOfMinds.Services.Services
         {
             _gameRepository = gameRepository;
             _mapper = mapper;
-           
+
             _subjectService = subjectService;
         }
 
@@ -31,12 +31,12 @@ namespace WarOfMinds.Services.Services
         {
             return _mapper.Map<GameDTO>(await _gameRepository.AddAsync(_mapper.Map<Game>(game)));
         }
-        
+
         public async Task<GameDTO> AddGameAsync(GameDTO game)
         {
             if (game.Subject == null)
             {
-                game.Subject =await _subjectService.GetByIdAsync(game.SubjectID);
+                game.Subject = await _subjectService.GetByIdAsync(game.SubjectID);
             }
             return _mapper.Map<GameDTO>(await _gameRepository.AddGameAsync(_mapper.Map<Game>(game)));
         }
@@ -48,7 +48,7 @@ namespace WarOfMinds.Services.Services
 
         public async Task<List<GameDTO>> GetAllAsync()
         {
-            var ans= _mapper.Map<List<GameDTO>>(await _gameRepository.GetAllAsync());
+            var ans = _mapper.Map<List<GameDTO>>(await _gameRepository.GetAllAsync());
             return ans;
         }
 
@@ -58,15 +58,15 @@ namespace WarOfMinds.Services.Services
 
         }
 
-        public async Task<GameDTO> UpdateAsync(int id,GameDTO game)
+        public async Task<GameDTO> UpdateAsync(int id, GameDTO game)
         {
-            game.GameID=id;
+            game.GameID = id;
             return _mapper.Map<GameDTO>(await _gameRepository.UpdateAsync(_mapper.Map<Game>(game)));
         }
-        
-        public async Task<GameDTO> UpdateGameAsync(int id,GameDTO game)
+
+        public async Task<GameDTO> UpdateGameAsync(int id, GameDTO game)
         {
-            game.GameID=id;
+            game.GameID = id;
             return _mapper.Map<GameDTO>(await _gameRepository.UpdateGameAsync(_mapper.Map<Game>(game)));
         }
 
@@ -118,11 +118,12 @@ namespace WarOfMinds.Services.Services
                 //apdate game to active
                 game.IsActive = true;
                 // Add player to existing game
-                game.Players.Add(player);
-                
+                if (!game.Players.Contains(player))
+                    game.Players.Add(player);
+
                 return await UpdateGameAsync(game.GameID, game);
             }
-            
+
 
         }
 
@@ -133,7 +134,7 @@ namespace WarOfMinds.Services.Services
                 //ממוצע של דירוגי השחקנים
                 int NumOfPlayers = game.Players.Count;
                 game.Rating = (game.Rating + newPlayerRating) / NumOfPlayers + 1;
-                await UpdateAsync(game.GameID,game);
+                await UpdateAsync(game.GameID, game);
             }
             catch (Exception ex)
             {
