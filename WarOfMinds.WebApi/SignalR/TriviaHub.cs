@@ -35,8 +35,8 @@ namespace WarOfMinds.WebApi.SignalR
             PlayerDTO player = await _playerService.GetByIdAsync(playerId);
             SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
             //בהערה עד שהאפדייט יעבוד ואז לשנות גם את הגיים אי די
-            //game = await _gameService.FindGameAsync(subject, player);
-            questions = new List<Question>();//הקריאה לאי פי אי של השאלות והמיפוי של הג'יסון לשאלה
+            game = await _gameService.FindGameAsync(subject, player);
+            //questions = new List<Question>();//הקריאה לאי פי אי של השאלות והמיפוי של הג'יסון לשאלה
             // Add player to game's SignalR group
             await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{game.GameID}");
 
@@ -157,20 +157,30 @@ namespace WarOfMinds.WebApi.SignalR
         //}
 
         public async void Execute()
-        {           
-            int i = 0;
+        {                       
             foreach (Question item in questions)
             {
                 //שולח את השאלה לכל השחקנים
                 await DisplayQuestionAsync(item);
                 //כאן השהיה של כמה שניות לקבלת התשובות
                 //שולח את התשובה לכל השחקנים
-                sendAnswerAndWinner(item);
+                //חישוב הניקוד של השאלה הזו עבור כל השחקנים
+                string winner=SortPlayersByAnswers(item.qNum);
+                sendAnswerAndWinner(winner,item);
             }
             Scoring();
         }
 
-        private async void sendAnswerAndWinner(Question q)
+        private string SortPlayersByAnswers(int qNum)
+        {
+            //מיון התשובות לפי נכונות וזמן
+            //שליפת השם של השחקן המנצח
+            List<AnswerResult> answers = gameResults[qNum];
+            answers.Sort();
+            return answers[answers.Count-1].ToString();//שליפת השחקן
+        }
+
+        private async void sendAnswerAndWinner(string winner,Question q)
         {
             //כדאי לשלוח את השם של השחקן שענה נכון ראשון
             //צריך למיין את השחקנים לפי המהירות והנכונות ולשלוף את השם של השחקן הראשון
@@ -178,11 +188,7 @@ namespace WarOfMinds.WebApi.SignalR
             await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveAnswerAndWinner", q.correct_answer);
         }
 
-        private void CheckAnswer(int qNum, string input)
-        {
-            //בפונקציה הזו אמורים לחשב את הניקוד של כל שחקן על השאלה הזו ולשמור את הנתונים במערך גלובלי
 
-        }
 
         private void GetAnswerAsync(int qNum, string answer, int time)
         {
