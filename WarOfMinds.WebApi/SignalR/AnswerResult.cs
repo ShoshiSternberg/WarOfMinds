@@ -2,12 +2,13 @@
 {
     public class AnswerResult
     {
+        public string player { get; set; }
         public bool Score { get; set; }
-        public TimeSpan AnswerTime { get; set; }
+        public int AnswerTime { get; set; }
 
-        public bool IsCorrect(int answerId, int playerAnswer)
+        public bool IsCorrect(string correct_answer, string playerAnswer)
         {
-            return answerId== playerAnswer;
+            return correct_answer == playerAnswer;
         }
     }
 }

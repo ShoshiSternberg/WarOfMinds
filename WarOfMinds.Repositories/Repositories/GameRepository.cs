@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using WarOfMinds.Repositories.Entities;
 using WarOfMinds.Repositories.Interfaces;
 
@@ -34,13 +35,9 @@ namespace WarOfMinds.Repositories.Repositories
 
         public async Task<List<Game>> GetAllAsync()
         {
-            return await _context.Games.ToListAsync();
+            return await _context.Games.Include(g=>g.Subject).ToListAsync();
         }
 
-        //public async Task<Game> GetByIdAsync(int id)
-        //{
-        //    return await _context.Games.FindAsync(id);
-        //}
         public async Task<Game> GetByIdAsync(int id)
         {
             return await _context.Games.Include(g => g.Subject).FirstOrDefaultAsync(g => g.GameID == id);
@@ -74,7 +71,6 @@ namespace WarOfMinds.Repositories.Repositories
             await _context.SaveChangesAsync();
             return addedGame.Entity;            
         }
-
         public async Task<Game> UpdateGameAsync(Game game)
         {
             try
@@ -95,9 +91,11 @@ namespace WarOfMinds.Repositories.Repositories
 
                     if (subject != null)
                     {
+                        // Attach the subject to the context
+                        _context.Subjects.Attach(subject);
+
                         // Update the game's subject
                         gameToUpdate.Subject = subject;
-                        _context.Subjects.Attach(subject);
                     }
 
                     // Add new players to the game
@@ -114,7 +112,6 @@ namespace WarOfMinds.Repositories.Repositories
                         else
                         {
                             // Player doesn't exist in the database, add player to the context
-
                             _context.Players.Add(p1);
                         }
 
@@ -125,23 +122,28 @@ namespace WarOfMinds.Repositories.Repositories
                         }
                     }
 
-                    var updatedGame = _context.Games.Update(game);
+                    // Update the game in the context
+                    var updatedGame = _context.Games.Update(gameToUpdate);
+
+                    // Save changes to the database
                     await _context.SaveChangesAsync();
+
+                    // Return the updated game
                     return updatedGame.Entity;
                 }
                 else
                 {
-                   return await AddAsync(gameToUpdate);
+                    return await AddAsync(gameToUpdate);
                 }
-
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
                 return null;
             }
         }
-        
+
+
         public async Task<Game> GetCurrentGame(Subject subject)
         {
 

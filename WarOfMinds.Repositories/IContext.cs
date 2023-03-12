@@ -17,6 +17,7 @@ namespace WarOfMinds.Repositories
         DbSet<Subject> Subjects { get; set; }
 
         int SaveChanges();
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
     }
 }

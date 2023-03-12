@@ -24,9 +24,9 @@ namespace WarOfMinds.WebApi.Controllers
 
         // GET api/<SubjectController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<SubjectDTO> Get(int id)
         {
-            return "value";
+            return await _subjectService.GetByIdAsync(id);
         }
 
         // POST api/<SubjectController>
