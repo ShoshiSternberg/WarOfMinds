@@ -123,7 +123,7 @@ namespace WarOfMinds.Repositories.Repositories
                     }
 
                     // Update the game in the context
-                    var updatedGame = _context.Games.(gameToUpdate);
+                    var updatedGame = _context.Games.Update(gameToUpdate);
                     // Save changes to the database
                     var t = await _context.SaveChangesAsync();
 

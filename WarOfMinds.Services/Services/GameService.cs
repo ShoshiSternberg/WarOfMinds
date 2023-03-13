@@ -141,6 +141,15 @@ namespace WarOfMinds.Services.Services
                 Console.WriteLine(ex.ToString());
             }
         }
+        //כמובן צריך להחליט מהי הרמה המתאימה לאיזה טווח של דירוג
+        public string Difficulty(int rating)
+        {
+            if (rating < 1000)
+                return "easy";
+            if (rating > 2000)
+                return "medium";
+            return "hard";
 
+        }
     }
 }

@@ -1,11 +1,14 @@
 ﻿using System.Globalization;
 using System.Runtime.Intrinsics.X86;
+using WarOfMinds.Common.DTO;
 
 namespace WarOfMinds.WebApi.SignalR
 {
     public class AnswerResult : IComparable<AnswerResult>
     {
-        public string player { get; set; }
+
+        public string connectionId { get; set;}
+        public PlayerDTO player { get; set; }
         public bool Score { get; set; }
         public int AnswerTime { get; set; }
 
