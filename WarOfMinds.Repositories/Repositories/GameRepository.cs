@@ -35,7 +35,7 @@ namespace WarOfMinds.Repositories.Repositories
 
         public async Task<List<Game>> GetAllAsync()
         {
-            return await _context.Games.Include(g=>g.Subject).Include(g=>g.Players).ToListAsync();
+            return await _context.Games.Include(g=>g.Subject).ToListAsync();
         }
 
         public async Task<Game> GetByIdAsync(int id)

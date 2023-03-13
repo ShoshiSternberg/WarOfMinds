@@ -30,7 +30,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddServices();
 //builder.Services.AddDbContext<IContext, DataContext>(options => options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB"));
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<IDictionary<string, PlayerDTO>>(opts => new Dictionary<string, PlayerDTO>());
+builder.Services.AddSingleton<IDictionary<string, UserConnection>>(opts => new Dictionary<string, UserConnection>());
+builder.Services.AddSingleton<IDictionary<string, GroupData>>(opts => new Dictionary<string, GroupData>());
 builder.Services.AddDbContext<IContext, DataContext>(options =>
 {
     options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB");
