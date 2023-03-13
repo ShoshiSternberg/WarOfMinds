@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using WarOfMinds.Common.DTO;
 using WarOfMinds.Context;
@@ -28,8 +29,12 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddServices();
-//builder.Services.AddDbContext<IContext, DataContext>(options => options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB"));
 builder.Services.AddSignalR();
+//builder.Services.Configure<HubOptions>(options =>
+//{
+//    options.HandshakeTimeout = TimeSpan.FromMinutes(5);
+//    options.ClientTimeoutInterval = TimeSpan.FromMinutes(5);
+//});
 builder.Services.AddSingleton<IDictionary<string, UserConnection>>(opts => new Dictionary<string, UserConnection>());
 builder.Services.AddSingleton<IDictionary<string, GroupData>>(opts => new Dictionary<string, GroupData>());
 builder.Services.AddDbContext<IContext, DataContext>(options =>

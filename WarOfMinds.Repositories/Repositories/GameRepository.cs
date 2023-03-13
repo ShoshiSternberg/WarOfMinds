@@ -135,6 +135,7 @@ namespace WarOfMinds.Repositories.Repositories
                     return await AddAsync(gameToUpdate);
                 }
             }
+
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
