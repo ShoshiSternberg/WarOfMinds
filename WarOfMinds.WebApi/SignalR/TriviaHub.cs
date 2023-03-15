@@ -207,7 +207,9 @@ namespace WarOfMinds.WebApi.SignalR
                 //שולח את השאלה לכל השחקנים
                 await DisplayQuestionAsync(item);
                 //כאן השהיה של כמה שניות לקבלת התשובות
+                if(Context == null ) { return; }     
                 await Task.Delay(timeToAnswer);
+                if (Context == null) { return; }
                 //שולח את התשובה לכל השחקנים
                 //חישוב הניקוד של השאלה הזו עבור כל השחקנים
                 string winner = SortPlayersByAnswers(item.questionId);
@@ -216,8 +218,12 @@ namespace WarOfMinds.WebApi.SignalR
             Scoring();
         }
 
-        private string SortPlayersByAnswers(int qNum)
+        public string SortPlayersByAnswers(int qNum)
         {
+            if (Context.ConnectionAborted.IsCancellationRequested)
+            {
+                return "connection closed";
+            }
             //מיון התשובות לפי נכונות וזמן
             //שליפת השם של השחקן המנצח
             if (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults != null)
@@ -232,7 +238,7 @@ namespace WarOfMinds.WebApi.SignalR
             return "No one has answered this question :(";
         }
 
-        private async void ReceiveAnswerAndWinner(string winner, Question q)
+        public async void ReceiveAnswerAndWinner(string winner, Question q)
         {
             //כדאי לשלוח את השם של השחקן שענה נכון ראשון
 
@@ -242,22 +248,31 @@ namespace WarOfMinds.WebApi.SignalR
 
 
 
-        private void GetAnswerAsync(int qNum, string answer, int time)
+        public async void GetAnswerAsync(int qNum, string answer, int time)
         {
             Question q = _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum];
             AnswerResult result = new AnswerResult();
             result.Score = result.IsCorrect(q.correct_answer, answer);
+            result.connectionId=Context.ConnectionId;
             result.player = _connections[Context.ConnectionId].player;
             result.AnswerTime = time;//ההפרש בין הזמן שהוא קיבל את השאלה לבין הזמן שהוא שלח את התשובה.
+            if (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults == null)
+            {
+                //if it is the first question, we have to create a new dictionary
+                _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults = new Dictionary<int, List<AnswerResult>>();
+            }
+
             if (!_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults.ContainsKey(qNum))
             {
                 // If the key does not exist in the dictionary, create a new list and add it to the dictionary
                 _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults[qNum] = new List<AnswerResult>();
             }
 
+
             // Add the AnswerResult object to the list at the specified key
             _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults[qNum].Add(result);
-
+            //שולחים לו מייד אם ענה נכון או לא
+            await Clients.Caller.SendAsync("ReceiveAnswer",$" Your answer has been captured in the system [{result.Score}], the correct answer is:{_groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum].correct_answer}");
         }
 
 

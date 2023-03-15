@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using WarOfMinds.Repositories.Entities;
 using WarOfMinds.Repositories.Interfaces;
+using System.Data.SqlClient;
+
 
 namespace WarOfMinds.Repositories.Repositories
 {
@@ -97,7 +100,7 @@ namespace WarOfMinds.Repositories.Repositories
                         // Update the game's subject
                         gameToUpdate.Subject = subject;
                     }
-
+                    
                     // Add new players to the game
                     foreach (Player p1 in game.Players)
                     {
@@ -121,7 +124,7 @@ namespace WarOfMinds.Repositories.Repositories
                             gameToUpdate.Players.Add(player);
                         }
                     }
-
+                    
                     // Update the game in the context
                     var updatedGame = _context.Games.Update(gameToUpdate);
                     // Save changes to the database
