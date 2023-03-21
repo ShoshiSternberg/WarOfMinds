@@ -15,12 +15,13 @@ namespace WarOfMinds.Services
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddRepositories();
-            services.AddScoped<IGameService, GameService>();            
+            services.AddScoped<IGameService, GameService>();
             services.AddScoped<IPlayerService, PlayerService>();
-            
-            services.AddScoped<ISubjectService, SubjectService>();
 
-            
+            services.AddScoped<ISubjectService, SubjectService>();
+            services.AddScoped<IEloCalculator, EloCalculator>();
+            services.AddSingleton<IDictionary<int, PlayerForCalcRating>>(opts => new Dictionary<int, PlayerForCalcRating>());
+
             services.AddAutoMapper(typeof(MappingProfile));
             //מה זה
             //services.AddMemoryCache();

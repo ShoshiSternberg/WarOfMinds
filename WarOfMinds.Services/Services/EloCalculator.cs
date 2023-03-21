@@ -38,7 +38,7 @@ namespace WarOfMinds.Services.Services
         public GameService Game { get; set; }
         public EloCalculator(IConfiguration configuration, IGameService gameService, IPlayerService playerService, IDictionary<int, PlayerForCalcRating> players)//צריל לקבל את הערכים או להשלים אותם לבד
         {
-            _configuration = configuration.GetSection("section2:subsection0");
+            _configuration = configuration.GetSection("EloCalculator");
             _gameService = gameService;
             _playerService = playerService;
             _d = Convert.ToInt32(_configuration["d"]);//400

@@ -6,7 +6,7 @@
       "type": "multiple",
       "difficulty": "easy",
       "question": "What does the &quot;MP&quot; stand for in MP3?",
-      "correct_answer": "Moving Picture",
+      "correct_answer": "answer1",
       "incorrect_answers": [ "Music Player", "Multi Pass", "Micro Point" ]
     },
     {
@@ -14,7 +14,7 @@
       "type": "multiple",
       "difficulty": "easy",
       "question": "If you were to code software in this language you&#039;d only be able to type 0&#039;s and 1&#039;s.",
-      "correct_answer": "Binary",
+      "correct_answer": "answer2",
       "incorrect_answers": [ "JavaScript", "C++", "Python" ]
     },
     {
@@ -22,7 +22,7 @@
       "type": "multiple",
       "difficulty": "easy",
       "question": "In web design, what does CSS stand for?",
-      "correct_answer": "Cascading Style Sheet",
+      "correct_answer": "answer3",
       "incorrect_answers": [ "Counter Strike: Source", "Corrective Style Sheet", "Computer Style Sheet" ]
     },
     {
@@ -30,7 +30,7 @@
       "type": "multiple",
       "difficulty": "easy",
       "question": "What is the domain name for the country Tuvalu?",
-      "correct_answer": ".tv",
+      "correct_answer": "answer4",
       "incorrect_answers": [ ".tu", ".tt", ".tl" ]
     },
     {
@@ -38,7 +38,7 @@
       "type": "multiple",
       "difficulty": "easy",
       "question": "In &quot;Hexadecimal&quot;, what color would be displayed from the color code? &quot;#00FF00&quot;?",
-      "correct_answer": "Green",
+      "correct_answer": "answer5",
       "incorrect_answers": [ "Red", "Blue", "Yellow" ]
     },
     {
@@ -46,7 +46,7 @@
       "type": "multiple",
       "difficulty": "easy",
       "question": "What does LTS stand for in the software market?",
-      "correct_answer": "Long Term Support",
+      "correct_answer": "answer6",
       "incorrect_answers": [ "Long Taco Service", "Ludicrous Transfer Speed", "Ludicrous Turbo Speed" ]
     },
     {
@@ -54,7 +54,7 @@
       "type": "boolean",
       "difficulty": "easy",
       "question": "The Windows 7 operating system has six main editions.",
-      "correct_answer": "True",
+      "correct_answer": "answer7",
       "incorrect_answers": [ "False" ]
     },
     {
@@ -62,7 +62,7 @@
       "type": "boolean",
       "difficulty": "easy",
       "question": "The NVidia GTX 1080 gets its name because it can only render at a 1920x1080 screen resolution.",
-      "correct_answer": "False",
+      "correct_answer": "answer8",
       "incorrect_answers": [ "True" ]
     },
     {
@@ -78,7 +78,7 @@
       "type": "multiple",
       "difficulty": "easy",
       "question": "What does the computer software acronym JVM stand for?",
-      "correct_answer": "Java Virtual Machine",
+      "correct_answer": "answer10",
       "incorrect_answers": [ "Java Vendor Machine", "Java Visual Machine", "Just Virtual Machine" ]
     }
   ]

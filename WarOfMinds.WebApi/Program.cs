@@ -30,11 +30,15 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddServices();
 builder.Services.AddSignalR();
-//builder.Services.Configure<HubOptions>(options =>
-//{
-//    options.HandshakeTimeout = TimeSpan.FromMinutes(5);
-//    options.ClientTimeoutInterval = TimeSpan.FromMinutes(5);
-//});
+builder.Services.Configure<HubOptions>(options =>
+{
+    options.HandshakeTimeout = TimeSpan.FromSeconds(300);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(300);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(300);
+});
+
+
+//dictionaries for the hub
 builder.Services.AddSingleton<IDictionary<string, UserConnection>>(opts => new Dictionary<string, UserConnection>());
 builder.Services.AddSingleton<IDictionary<string, GroupData>>(opts => new Dictionary<string, GroupData>());
 builder.Services.AddDbContext<IContext, DataContext>(options =>
