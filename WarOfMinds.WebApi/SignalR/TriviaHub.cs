@@ -15,6 +15,8 @@ using RestSharp;
 using static Azure.Core.HttpHeader;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace WarOfMinds.WebApi.SignalR
 {
@@ -24,14 +26,16 @@ namespace WarOfMinds.WebApi.SignalR
         private readonly IGameService _gameService;
         private readonly IPlayerService _playerService;
         private readonly ISubjectService _subjectService;
+        private readonly IEloCalculator _eloCalculator;
         private readonly IDictionary<string, UserConnection> _connections;
         private readonly IDictionary<string, GroupData> _groupData;
 
-        public TriviaHub(IGameService gameService, IPlayerService playerService, ISubjectService subjectService, IDictionary<string, UserConnection> connections, IDictionary<string, GroupData> groupData)
+        public TriviaHub(IGameService gameService, IPlayerService playerService, ISubjectService subjectService,IEloCalculator eloCalculator, IDictionary<string, UserConnection> connections, IDictionary<string, GroupData> groupData)
         {
             _gameService = gameService;
             _playerService = playerService;
             _subjectService = subjectService;
+            _eloCalculator= eloCalculator;
             _connections = connections;
             _groupData = groupData;
         }
@@ -200,14 +204,14 @@ namespace WarOfMinds.WebApi.SignalR
 
         public async void Execute()
         {
-            int timeToAnswer = 15000; //15 שניות
+            int timeToAnswer = 5000; //15 שניות
 
             foreach (Question item in _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions)
             {
                 //שולח את השאלה לכל השחקנים
                 await DisplayQuestionAsync(item);
                 //כאן השהיה של כמה שניות לקבלת התשובות
-                if(Context == null ) { return; }     
+                if (Context == null) { return; }
                 await Task.Delay(timeToAnswer);
                 if (Context == null) { return; }
                 //שולח את התשובה לכל השחקנים
@@ -224,18 +228,31 @@ namespace WarOfMinds.WebApi.SignalR
             {
                 return "connection closed";
             }
-            //מיון התשובות לפי נכונות וזמן
-            //שליפת השם של השחקן המנצח
+
+
             if (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults != null)
             {
                 if (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults.ContainsKey(qNum))
                 {
                     List<AnswerResult> answers = _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults[qNum];
-                    answers.Sort();
-                    return answers[answers.Count - 1].player.PlayerName;//שליפת השחקן
+                    answers.Sort();//מיון התשובות לפי נכונות וזמן
+                    //עדכון הנקודות של כל שחקן על השאלה הזו- לפי המיקום שלו במערך. אם הוא ענה לא נכון
+                    //הניקוד הוא 0
+                    int j;
+                    for (j = 0; answers[j].answer == true; j++) ;//סופר כמה ענו נכון
+                    for (int i = 0; i < answers.Count; i++)
+                    {
+                        if (answers[i].answer == true)
+                            _connections[answers[i].connectionId].score += j--;//ימ שענה הכי מהר מקבל הכי הרבה נקודות
+
+                    }
+                    if (answers[0].answer == true)//רק אם הוא באמת ענה נכון- יתכן שכל התשובות לא היו נכונות
+                    {
+                        return answers[0].player.PlayerName;//שליפת השם של השחקן המנצח
+                    }
                 }
             }
-            return "No one has answered this question :(";
+            return "No one answered this question correctly :(";
         }
 
         public async void ReceiveAnswerAndWinner(string winner, Question q)
@@ -252,8 +269,8 @@ namespace WarOfMinds.WebApi.SignalR
         {
             Question q = _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum];
             AnswerResult result = new AnswerResult();
-            result.Score = result.IsCorrect(q.correct_answer, answer);
-            result.connectionId=Context.ConnectionId;
+            result.answer = result.IsCorrect(q.correct_answer, answer);
+            result.connectionId = Context.ConnectionId;
             result.player = _connections[Context.ConnectionId].player;
             result.AnswerTime = time;//ההפרש בין הזמן שהוא קיבל את השאלה לבין הזמן שהוא שלח את התשובה.
             if (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults == null)
@@ -272,16 +289,33 @@ namespace WarOfMinds.WebApi.SignalR
             // Add the AnswerResult object to the list at the specified key
             _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults[qNum].Add(result);
             //שולחים לו מייד אם ענה נכון או לא
-            await Clients.Caller.SendAsync("ReceiveAnswer",$" Your answer has been captured in the system [{result.Score}], the correct answer is:{_groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum].correct_answer}");
+            await Clients.Caller.SendAsync("ReceiveAnswer", $" Your answer has been captured in the system [{result.answer}], the correct answer is:{_groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum].correct_answer}");
         }
 
 
 
-        private void Scoring()
+        private async void Scoring()
         {
-            //בפונקציה הזו אמורים לחשב את המנצח, לשלוח לו את ההודעה המשמחת ולשלוח לכל השחקנים את הודעת הניצחון
+            //בפונקציה הזו אמורים לחשב את המנצח, (לשלוח לו את ההודעה המשמחת) ולשלוח לכל השחקנים את הודעת הניצחון
             //לעדכן בדאטה בייס את הניקוד של כל השחקנים
-            throw new NotImplementedException();
+            //המנצח הוא מי שקיבל הכי הרבה נקודות
+            List<PlayerDTO> players = _groupData[$"game_{_connections[Context.ConnectionId].game}"].game.Players.ToList<PlayerDTO>();
+            players = players.OrderBy(p => GetScoreByPlayerID(p.PlayerID)).ToList();
+            await DisplayWinnerAndEndGameAsync(players[0].PlayerName, players[1].PlayerName, players[2].PlayerName);
+
+            _eloCalculator.UpdateRatingOfAllPlayers(_connections[Context.ConnectionId].game,players);
+            //איכשהו לשלוח לשחקן את הציון המעודכן שלו.
+            //אולי בסיום דרך הקונטרולר
+        }
+
+        //מציאת UserConnection לפי playerID
+        private int GetScoreByPlayerID(int playerID)
+        {
+            var userConnection = _connections.Values.FirstOrDefault(conn => conn.player.PlayerID == playerID);
+
+            if (userConnection == null)
+                return 0;
+            return userConnection.score;
         }
 
 
@@ -294,6 +328,15 @@ namespace WarOfMinds.WebApi.SignalR
             // Send a message to the group
             await Clients.Group($"game_{_connections[Context.ConnectionId].game}").SendAsync("ReceiveQuestion", question);
 
+        }
+        
+        [HubMethodName("ReceiveWinnerAndGameEnd")]
+        private async Task DisplayWinnerAndEndGameAsync(string p1,string p2,string p3)
+        {   
+            //שליחת המנצחים
+            await Clients.Group($"game_{_connections[Context.ConnectionId].game}").SendAsync("ReceiveQuestion", $"first place: {p1} second place: {p2} third place: {p3}");
+            //שליחת הנקודות שהוא צבר במשחק הזה
+            //וכן הדירוג המעודכן שלו- אחרי החישוב
         }
 
 

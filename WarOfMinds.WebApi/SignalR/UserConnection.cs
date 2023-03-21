@@ -11,5 +11,6 @@ namespace WarOfMinds.WebApi.SignalR
         }
         public PlayerDTO player { get; set; }
         public int game { get; set; }
+        public int score { get; set; }
     }
 }

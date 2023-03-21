@@ -9,16 +9,16 @@ namespace WarOfMinds.WebApi.SignalR
 
         public string connectionId { get; set;}
         public PlayerDTO player { get; set; }
-        public bool Score { get; set; }
+        //public int Score { get; set; } לא בטוח שצריך את זה
         public int AnswerTime { get; set; }
-
+        public bool answer { get; set; }
         public int CompareTo(AnswerResult other)
         {
             // First, compare by Score
-            if (this.Score != other.Score)
+            if (this.answer != other.answer)
             {
                 // Items with Score = true come first
-                return this.Score ? -1 : 1;
+                return this.answer ? -1 : 1;
             }
             else
             {
