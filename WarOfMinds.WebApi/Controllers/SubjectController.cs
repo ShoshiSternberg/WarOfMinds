@@ -38,14 +38,16 @@ namespace WarOfMinds.WebApi.Controllers
 
         // PUT api/<SubjectController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public Task<SubjectDTO> Put([FromBody] SubjectDTO value)
         {
+            return _subjectService.UpdateAsync(value);
         }
 
         // DELETE api/<SubjectController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public Task Delete(int id)
         {
+            return _subjectService.DeleteByIdAsync(id);
         }
     }
 }
