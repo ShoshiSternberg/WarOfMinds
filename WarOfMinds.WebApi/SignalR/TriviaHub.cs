@@ -63,7 +63,7 @@ namespace WarOfMinds.WebApi.SignalR
             {
                 await GetQuestionsAsync(subject.SubjectID, _gameService.Difficulty(game.Rating));
                 //מיד אחרי שמכניסים את השאלות, מתחילים את המשחק 
-                Execute();
+                await Execute();
             }
 
         }
@@ -133,7 +133,7 @@ namespace WarOfMinds.WebApi.SignalR
                 string winner = SortPlayersByAnswers(item.questionId);
                 ReceiveAnswerAndWinner(winner, item);
             }
-            Scoring();
+            await Scoring();
         }
 
         public string SortPlayersByAnswers(int qNum)
