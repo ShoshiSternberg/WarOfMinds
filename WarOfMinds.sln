@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WarOfMinds.Services", "WarO
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WarOfMinds.WebApi", "WarOfMinds.WebApi\WarOfMinds.WebApi.csproj", "{799EF9D8-1DF7-40F9-BF9B-58DA83890D35}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WarOfMinds.Context", "WarOfMinds.Context\WarOfMinds.Context.csproj", "{81ABEE1B-8313-48FA-B1DA-AACB8E45B717}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WarOfMinds.Context", "WarOfMinds.Context\WarOfMinds.Context.csproj", "{81ABEE1B-8313-48FA-B1DA-AACB8E45B717}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

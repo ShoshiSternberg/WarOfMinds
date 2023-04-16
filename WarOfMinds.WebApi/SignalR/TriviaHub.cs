@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Identity.Client.Extensibility;
+﻿using Microsoft.Identity.Client.Extensibility;
 using System;
 using System.Collections.Generic;
 using WarOfMinds.Common.DTO;
@@ -18,6 +17,7 @@ using System.Text.Json.Serialization;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Data;
+using Microsoft.AspNetCore.SignalR;
 
 
 namespace WarOfMinds.WebApi.SignalR
@@ -73,28 +73,41 @@ namespace WarOfMinds.WebApi.SignalR
         [HttpGet("{subject},{diffuculty}", Name = "GetRanking")]
         public async Task GetQuestionsAsync(int subject, string difficulty)
         {
-            subject = 21;//למחוק את זה , צריך לשלוח רק אי די גדול מ11
-            int amount = 10;//מספר השאלות            
-            var client = new RestClient($"https://opentdb.com/api.php?amount={amount}&category={subject}&difficulty={difficulty}");
-            var request = new RestRequest("", Method.Get);
-            RestResponse response = await client.ExecuteAsync(request);
-
-            string jsonString = response.Content;
-            //המרה מג'יסון לאובייקט שאלה
-            Root questionsList =
-                JsonSerializer.Deserialize<Root>(jsonString);
-            _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions = questionsList.results;
-            // Set questionId for each Question object
-            int questionId = 1;
-            foreach (var question in questionsList.results)
+            try
             {
-                question.questionId = questionId++;
+                subject = 21;//למחוק את זה , צריך לשלוח רק אי די גדול מ11
+                int amount = 10;//מספר השאלות            
+                var client = new RestClient($"https://opentdb.com/api.php?amount={amount}&category={subject}&difficulty={difficulty}");
+                var request = new RestRequest("", Method.Get);
+                RestResponse response = await client.ExecuteAsync(request);
+
+                string jsonString = response.Content;
+                //המרה מג'יסון לאובייקט שאלה
+                Root questionsList =
+                    JsonSerializer.Deserialize<Root>(jsonString);
+
+                if (questionsList.results == null)//אם אין אינטרנט בינתיים שיקרא מהדף
+                {
+                    string text = File.ReadAllText("./Questions.json");
+                    questionsList =JsonSerializer.Deserialize<Root>(text);
+                }
+                _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions = questionsList.results;
+                // Set questionId for each Question object
+                int questionId = 1;
+                foreach (var question in questionsList.results)
+                {
+                    question.questionId = questionId++;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
         }
 
 
-      
+
         //מהלך המשחק
         public async Task Execute()
         {
@@ -107,10 +120,13 @@ namespace WarOfMinds.WebApi.SignalR
                 await DisplayQuestionAsync(item);
                 //כאן השהיה של כמה שניות לקבלת התשובות
                 //if (Context == null) { return; }
-                //await Task.Delay(timeToAnswer);
+                Task task = Task.Delay(timeToAnswer);
+                task.Wait(5000);
+                
+                //Thread.Sleep(1000);
                 //if (Context == null) { return; }
 
-                await GetAnswerAsync(item.questionId, $"answer{item.questionId}", rnd.Next());
+                //await GetAnswerAsync(item.questionId, $"answer{item.questionId}", rnd.Next());
 
                 //שולח את התשובה לכל השחקנים
                 //חישוב הניקוד של השאלה הזו עבור כל השחקנים
@@ -187,7 +203,7 @@ namespace WarOfMinds.WebApi.SignalR
             // Add the AnswerResult object to the list at the specified key
             _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults[qNum].Add(result);
             //שולחים לו מייד אם ענה נכון או לא
-            await Clients.Caller.SendAsync("ReceiveAnswer", $" Your answer has been captured in the system [{result.answer}], the correct answer is:{_groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum].correct_answer}");
+            await Clients.Caller.SendAsync("ReceiveAnswerAndWinner", $" Your answer has been captured in the system [{result.answer}], the correct answer is:{_groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum].correct_answer}");
         }
 
 

@@ -32,9 +32,9 @@ builder.Services.AddServices();
 builder.Services.AddSignalR();
 builder.Services.Configure<HubOptions>(options =>
 {
-    options.HandshakeTimeout = TimeSpan.FromSeconds(300);
-    options.ClientTimeoutInterval = TimeSpan.FromSeconds(300);
-    options.KeepAliveInterval = TimeSpan.FromSeconds(300);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(30000);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30000);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(30000);
 });
 
 
