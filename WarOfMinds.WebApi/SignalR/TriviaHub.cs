@@ -88,7 +88,7 @@ namespace WarOfMinds.WebApi.SignalR
 
                 if (questionsList.results == null)//אם אין אינטרנט בינתיים שיקרא מהדף
                 {
-                    string text = File.ReadAllText("./Questions.json");
+                    string text = File.ReadAllText(@"H:\תכנות שנה ב תשפג\שושי שטרנברגר\פרויקט גמר\finnal project\WarOfMinds\WarOfMinds.WebApi\SignalR\Questions.json");
                     questionsList =JsonSerializer.Deserialize<Root>(text);
                 }
                 _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions = questionsList.results;
