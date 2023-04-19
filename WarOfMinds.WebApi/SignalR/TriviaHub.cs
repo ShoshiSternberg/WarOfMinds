@@ -111,24 +111,34 @@ namespace WarOfMinds.WebApi.SignalR
         //מהלך המשחק
         public async Task Execute()
         {
-            int timeToAnswer = 10000; //10 שניות
-            Random rnd = new Random();
-            rnd.Next();
-            foreach (Question item in _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions)
+            try
             {
-                //שולח את השאלה לכל השחקנים
-                await DisplayQuestionAsync(item);
-                //כאן השהיה של כמה שניות לקבלת התשובות
+                int timeToAnswer = 10000; //10 שניות
+                Random rnd = new Random();
+                rnd.Next();
+                foreach (Question item in _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions)
+                {
+                    //שולח את השאלה לכל השחקנים
+                    await DisplayQuestionAsync(item);
+                    //כאן השהיה של כמה שניות לקבלת התשובות
 
-                Task task = Task.Delay(timeToAnswer);
-                await task.WaitAsync(TimeSpan.FromSeconds(5.0));
+                    Task task = Task.Delay(5000);
+                    await task;
+                    //TimeSpan x = TimeSpan.FromSeconds(5.0);
+                    //await task.WaitAsync(x);
 
-                //שולח את התשובה לכל השחקנים
-                //חישוב הניקוד של השאלה הזו עבור כל השחקנים
-                string winner = SortPlayersByAnswers(item.questionId);
-                await ReceiveAnswerAndWinner(winner, item);
+
+                    //שולח את התשובה לכל השחקנים
+                    //חישוב הניקוד של השאלה הזו עבור כל השחקנים
+                    string winner = SortPlayersByAnswers(item.questionId);
+                    await ReceiveAnswerAndWinner(winner, item);
+                }
+                await Scoring();
             }
-            await Scoring();
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         public string SortPlayersByAnswers(int qNum)
