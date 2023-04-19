@@ -63,7 +63,7 @@ namespace WarOfMinds.WebApi.SignalR
             {
                 await GetQuestionsAsync(subject.SubjectID, _gameService.Difficulty(game.Rating));
                 //מיד אחרי שמכניסים את השאלות, מתחילים את המשחק 
-                await Execute();
+                Execute();
             }
 
         }
@@ -89,7 +89,7 @@ namespace WarOfMinds.WebApi.SignalR
                 if (questionsList.results == null)//אם אין אינטרנט בינתיים שיקרא מהדף
                 {
                     string text = File.ReadAllText(@"H:\תכנות שנה ב תשפג\שושי שטרנברגר\פרויקט גמר\finnal project\WarOfMinds\WarOfMinds.WebApi\SignalR\Questions.json");
-                    questionsList =JsonSerializer.Deserialize<Root>(text);
+                    questionsList = JsonSerializer.Deserialize<Root>(text);
                 }
                 _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions = questionsList.results;
                 // Set questionId for each Question object
@@ -119,19 +119,14 @@ namespace WarOfMinds.WebApi.SignalR
                 //שולח את השאלה לכל השחקנים
                 await DisplayQuestionAsync(item);
                 //כאן השהיה של כמה שניות לקבלת התשובות
-                //if (Context == null) { return; }
-                Task task = Task.Delay(timeToAnswer);
-                task.Wait(5000);
-                
-                //Thread.Sleep(1000);
-                //if (Context == null) { return; }
 
-                //await GetAnswerAsync(item.questionId, $"answer{item.questionId}", rnd.Next());
+                Task task = Task.Delay(timeToAnswer);
+                await task.WaitAsync(TimeSpan.FromSeconds(5.0));
 
                 //שולח את התשובה לכל השחקנים
                 //חישוב הניקוד של השאלה הזו עבור כל השחקנים
                 string winner = SortPlayersByAnswers(item.questionId);
-                ReceiveAnswerAndWinner(winner, item);
+                await ReceiveAnswerAndWinner(winner, item);
             }
             await Scoring();
         }
@@ -257,4 +252,5 @@ namespace WarOfMinds.WebApi.SignalR
 
 
     }
+
 }
