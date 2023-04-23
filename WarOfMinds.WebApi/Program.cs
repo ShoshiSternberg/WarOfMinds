@@ -35,6 +35,8 @@ builder.Services.Configure<HubOptions>(options =>
     options.HandshakeTimeout = TimeSpan.FromSeconds(30000);
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(30000);
     options.KeepAliveInterval = TimeSpan.FromSeconds(30000);
+    options.MaximumParallelInvocationsPerClient = 10;
+
 });
 
 

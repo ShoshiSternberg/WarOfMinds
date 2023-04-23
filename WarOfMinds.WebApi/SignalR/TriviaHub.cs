@@ -63,7 +63,13 @@ namespace WarOfMinds.WebApi.SignalR
             {
                 await GetQuestionsAsync(subject.SubjectID, _gameService.Difficulty(game.Rating));
                 //מיד אחרי שמכניסים את השאלות, מתחילים את המשחק 
-                Execute();
+               
+                await Task.Run(async () =>
+                {
+                    // Simulate some work
+                   await Execute();
+                });
+
             }
 
         }
@@ -122,12 +128,8 @@ namespace WarOfMinds.WebApi.SignalR
                     await DisplayQuestionAsync(item);
                     //כאן השהיה של כמה שניות לקבלת התשובות
 
-                    Task task = Task.Delay(5000);
-                    await task;
-                    //TimeSpan x = TimeSpan.FromSeconds(5.0);
-                    //await task.WaitAsync(x);
-
-
+                    await Task.Delay(5000);
+                  
                     //שולח את התשובה לכל השחקנים
                     //חישוב הניקוד של השאלה הזו עבור כל השחקנים
                     string winner = SortPlayersByAnswers(item.questionId);
