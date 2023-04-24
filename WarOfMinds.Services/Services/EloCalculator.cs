@@ -47,10 +47,10 @@ namespace WarOfMinds.Services.Services
             _players = players;
         }
 
-        private void Init(int gameID, List<PlayerDTO> playersSortedByScore)
-        {
-            List<PlayerDTO> playersFromDB = _gameService.GetByIdAsync(gameID).Result.Players.ToList<PlayerDTO>(); ;//זה אמור להיות כל השחקנים מהדאטה בייס
-
+        private async void Init(int gameID, List<PlayerDTO> playersSortedByScore)
+        {            
+            GameDTO game = await _gameService.GetByIdAsync(gameID);//זה אמור להיות כל השחקנים מהדאטה בייס
+            List<PlayerDTO> playersFromDB = game.Players.ToList<PlayerDTO>();
             List<PlayerForCalcRating> players = new List<PlayerForCalcRating>();
             for (int i = 0; i < playersFromDB.Count; i++)
             {
@@ -64,7 +64,10 @@ namespace WarOfMinds.Services.Services
         {
             Init(gameID, playersSortedByScore);
             int NumOfPlayers = _players.Count;
-
+            if (NumOfPlayers < 0)
+            {
+                return;
+            }
 
             //שלב א- חישוב ההסתברות
             double sumOfPlayersPropabilities = (NumOfPlayers * (NumOfPlayers - 1)) / 2;

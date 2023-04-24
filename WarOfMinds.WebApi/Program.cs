@@ -48,7 +48,7 @@ builder.Services.AddDbContext<IContext, DataContext>(options =>
     options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB");
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 
-});
+},ServiceLifetime.Singleton);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -61,6 +61,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthorization();
+
 app.MapHub<TriviaHub>("/TriviaHub");
 app.MapControllers();
 

@@ -38,7 +38,7 @@ namespace WarOfMinds.Repositories.Repositories
 
         public async Task<List<Game>> GetAllAsync()
         {
-            return await _context.Games.Include(g=>g.Subject).ToListAsync();
+            return await _context.Games.Include(g => g.Subject).ToListAsync();
         }
 
         public async Task<Game> GetByIdAsync(int id)
@@ -47,14 +47,14 @@ namespace WarOfMinds.Repositories.Repositories
         }
 
         public async Task<Game> UpdateAsync(Game game)
-        {            
+        {
             var updatedGame = _context.Games.Update(game);
             await _context.SaveChangesAsync();
             return updatedGame.Entity;
         }
 
         public async Task<Game> AddGameAsync(Game game)
-        {  
+        {
             if (game.Subject != null)
             {
                 // attach the subject to the context
@@ -68,11 +68,11 @@ namespace WarOfMinds.Repositories.Repositories
                     _context.Players.Attach(player);
                 }
             }
-            
+
             // add the game to the context
             var addedGame = await _context.Games.AddAsync(game);
             await _context.SaveChangesAsync();
-            return addedGame.Entity;            
+            return addedGame.Entity;
         }
         public async Task<Game> UpdateGameAsync(Game game)
         {
@@ -100,6 +100,8 @@ namespace WarOfMinds.Repositories.Repositories
                         // Update the game's subject
                         gameToUpdate.Subject = subject;
                     }
+
+
                     
                     // Add new players to the game
                     foreach (Player p1 in game.Players)
@@ -119,12 +121,12 @@ namespace WarOfMinds.Repositories.Repositories
                         }
 
                         // Add the player to the game if it's not already added
-                        if (gameToUpdate.Players.FirstOrDefault(p=>p.PlayerID==player.PlayerID)==null)
+                        if (gameToUpdate.Players.FirstOrDefault(p => p.PlayerID == player.PlayerID) == null)
                         {
                             gameToUpdate.Players.Add(player);
                         }
                     }
-                    
+
                     // Update the game in the context
                     var updatedGame = _context.Games.Update(gameToUpdate);
                     // Save changes to the database
@@ -150,14 +152,14 @@ namespace WarOfMinds.Repositories.Repositories
         public async Task<Game> GetCurrentGame(Subject subject)
         {
 
-            Game game= _context.Games.
+            Game game = _context.Games.
                 Where(g => g.Subject.SubjectID == subject.SubjectID && g.IsActive)
                 .FirstOrDefault();
-            
+
             return game;
 
-            
+
         }
-        
+
     }
 }
