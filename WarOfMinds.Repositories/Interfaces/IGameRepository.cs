@@ -17,5 +17,6 @@ namespace WarOfMinds.Repositories.Interfaces
         Task DeleteByIdAsync(int id);
         Task<Game> AddGameAsync(Game game);
         Task<Game> UpdateGameAsync( Game game);
+        Task<Game> GetWholeByIdAsync(int id);
     }
 }

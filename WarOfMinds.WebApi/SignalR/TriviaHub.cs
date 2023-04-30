@@ -54,6 +54,7 @@ namespace WarOfMinds.WebApi.SignalR
             _hubContext = hubContext;
             _configuration = configuration.GetSection("TriviaHub");
             _TimeToAnswer = Convert.ToInt32(_configuration["TimeToAnswer"]);
+            _TimeToAnswer = _configuration.GetValue<int>("TimeToAnswer");
 
         }
 
@@ -74,7 +75,10 @@ namespace WarOfMinds.WebApi.SignalR
             SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
 
             GameDTO game = await _gameService.FindGameAsync(subject, player);
-
+            if (game == null)
+            {
+                return;
+            }
             await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{game.GameID}");
             _connections.Add(Context.ConnectionId, new UserConnection(player, game.GameID));
             if (!(_groupData.ContainsKey($"game_{game.GameID}")))
@@ -85,7 +89,7 @@ namespace WarOfMinds.WebApi.SignalR
             OnGameJoined(game);
 
 
-            Console.WriteLine("after the join game");
+            Console.WriteLine($"player {player.PlayerID} joined to game {game.GameID}");
 
         }
 
@@ -164,7 +168,7 @@ namespace WarOfMinds.WebApi.SignalR
         {
             if (_groupData[$"game_{gameId}"].gameResults != null)
             {
-                //אם יש שחקנים שענו נכון על השאלה ממינים אותם לפי סדר המענ ושולפים את השחקן הראשון שזמן המענה שלו היה הכי נמוך
+                //אם יש שחקנים שענו נכון על השאלה ממינים אותם לפי סדר המענה ושולפים את השחקן הראשון שזמן המענה שלו היה הכי נמוך
 
                 //ברשימה הזו יש רק את מי שענה נכון על השאלה. צריך למיין את הרשימה לפי זמן מענה, לראות מי המנצח ולעדכן לכל השחקנים את כל הניקודים.
                 List<AnswerResult> answers = _groupData[$"game_{gameId}"].gameResults;

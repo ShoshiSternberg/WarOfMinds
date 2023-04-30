@@ -57,6 +57,12 @@ namespace WarOfMinds.Services.Services
             return _mapper.Map<GameDTO>(await _gameRepository.GetByIdAsync(id));
 
         }
+        
+        public async Task<GameDTO> GetWholeByIdAsync(int id)
+        {
+            return _mapper.Map<GameDTO>(await _gameRepository.GetWholeByIdAsync(id));
+
+        }
 
         public async Task<GameDTO> UpdateAsync(int id, GameDTO game)
         {

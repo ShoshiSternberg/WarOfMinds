@@ -67,6 +67,25 @@ namespace WarOfMinds.Context.Migrations
                     b.ToTable("Games");
                 });
 
+            modelBuilder.Entity("WarOfMinds.Repositories.Entities.GamePlayer", b =>
+                {
+                    b.Property<int>("GamePlayerID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GamePlayerID"));
+
+                    b.Property<int>("GameID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerID")
+                        .HasColumnType("int");
+
+                    b.HasKey("GamePlayerID");
+
+                    b.ToTable("GamePlayers");
+                });
+
             modelBuilder.Entity("WarOfMinds.Repositories.Entities.Player", b =>
                 {
                     b.Property<int>("PlayerID")

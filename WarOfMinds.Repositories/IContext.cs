@@ -15,6 +15,7 @@ namespace WarOfMinds.Repositories
         DbSet<Player> Players { get; set; }        
 
         DbSet<Subject> Subjects { get; set; }
+        DbSet<GamePlayer> GamePlayer { get; set; }
 
         int SaveChanges();
 

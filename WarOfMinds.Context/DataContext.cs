@@ -18,7 +18,7 @@ namespace WarOfMinds.Context
         public DbSet<Game> Games { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<Subject> Subjects { get; set; }
-
+        public DbSet<GamePlayer> GamePlayer { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
         : base(options)
         {

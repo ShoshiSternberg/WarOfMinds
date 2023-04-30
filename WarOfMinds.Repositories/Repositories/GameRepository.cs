@@ -147,19 +147,11 @@ namespace WarOfMinds.Repositories.Repositories
                 return null;
             }
         }
+                
 
-
-        public async Task<Game> GetCurrentGame(Subject subject)
+        public async Task<Game> GetWholeByIdAsync(int id)
         {
-
-            Game game = _context.Games.
-                Where(g => g.Subject.SubjectID == subject.SubjectID && g.IsActive)
-                .FirstOrDefault();
-
-            return game;
-
-
+            return await _context.Games.Include(g => g.Subject).Include(g => g.Players).FirstOrDefaultAsync(g => g.GameID == id);
         }
-
     }
 }

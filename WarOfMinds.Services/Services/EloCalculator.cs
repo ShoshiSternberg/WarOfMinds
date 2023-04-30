@@ -49,22 +49,22 @@ namespace WarOfMinds.Services.Services
             _players = players;
         }
 
-        private async Task Init(int gameID, List<PlayerDTO> playersSortedByScore,List<int> scores)
+        private async Task Init(int gameID, List<PlayerDTO> playersSortedByScore, List<int> scores)
         {
-            if(playersSortedByScore.Count ==1)//אם שחקן משחק לבד, אפשר להניח שיש לו יריב וירטואלי עם דרוג זהה לדרוג הקודם שלו
+            if (playersSortedByScore.Count == 1)//אם שחקן משחק לבד, אפשר להניח שיש לו יריב וירטואלי עם דרוג זהה לדרוג הקודם שלו
             {
-                PlayerDTO p=new PlayerDTO();
+                PlayerDTO p = new PlayerDTO();
                 p.PlayerID = 0;
                 p.PlayerName = "virtual";
-                p.ELORating = playersSortedByScore[0].ELORating;                                  
-                PlayerForCalcRating p1=new PlayerForCalcRating(p,0,0);//אם הוא נכשל מול עצמו היריב הוירטואלי מקבל את כל הנקודות- מס השאלות כפול מספר השניות לכל שאלה
+                p.ELORating = playersSortedByScore[0].ELORating;
+                PlayerForCalcRating p1 = new PlayerForCalcRating(p, 0, 0);//אם הוא נכשל מול עצמו היריב הוירטואלי מקבל את כל הנקודות- מס השאלות כפול מספר השניות לכל שאלה
                 if (scores[0] == 0)
-                    p1.scoreForPlacementPosition =Convert.ToInt32(_TriviaHubConfiguration["NumOfQuestions"])* Convert.ToInt32(_TriviaHubConfiguration["TimeToAnswer"]);
+                    p1.scoreForPlacementPosition = Convert.ToInt32(_TriviaHubConfiguration["NumOfQuestions"]) * Convert.ToInt32(_TriviaHubConfiguration["TimeToAnswer"]);
                 _players.Add(0, p1);
             }
 
-            GameDTO game = await _gameService.GetByIdAsync(gameID);//זה אמור להיות כל השחקנים מהדאטה בייס
-            List<PlayerDTO> playersFromDB = (List<PlayerDTO>)game.Players;            
+            GameDTO game = await _gameService.GetWholeByIdAsync(gameID);//זה אמור להיות כל השחקנים מהדאטה בייס
+            List<PlayerDTO> playersFromDB = (List<PlayerDTO>)game.Players;
             for (int i = 0; i < playersFromDB.Count; i++)
             {
                 _players.Add(playersFromDB[i].PlayerID, new PlayerForCalcRating(playersFromDB[i], scores[i], 0));
@@ -112,22 +112,22 @@ namespace WarOfMinds.Services.Services
                 if (_Base > 1)
                 {
                     exponentialDivider = 0;
-                    for (int i = 1; i < playersSortedByScore.Count; i++)
+                    foreach (var player in _players)
                     {
-                        exponentialDivider += (Math.Pow(_Base, _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition));
+                        exponentialDivider += (Math.Pow(_Base, player.Value.scoreForPlacementPosition));
                     }
-                    for (int i = 1; i < playersSortedByScore.Count; i++)
+                    foreach (var player in _players)
                     {
-                        double score = ((Math.Pow(_Base, _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition) - 1)) / exponentialDivider;
-                        _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition = score;
+                        double score = ((Math.Pow(_Base, player.Value.scoreForPlacementPosition) - 1)) / exponentialDivider;
+                        player.Value.scoreForPlacementPosition = score;
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < playersSortedByScore.Count; i++)
+                    foreach (var player in _players)
                     {
-                        double score = (playersSortedByScore.Count - i) / ((playersSortedByScore.Count * (playersSortedByScore.Count - 1)) / 2);
-                        _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition = score;
+                        double score = player.Value.scoreForPlacementPosition / ((NumOfPlayers * player.Value.scoreForPlacementPosition) / 2);
+                        player.Value.scoreForPlacementPosition = score;
 
                     }
                 }
@@ -137,7 +137,8 @@ namespace WarOfMinds.Services.Services
                 {
                     double newEloRating = Math.Round(item.Value.player.ELORating + _k * (NumOfPlayers - 1) * (item.Value.scoreForPlacementPosition - item.Value.probability));
                     item.Value.player.ELORating = (int)newEloRating;
-                    await _playerService.UpdateAsync(item.Value.player);
+                    if (item.Value.player.PlayerID != 0)//כמובן שאת הוירטואלי אין צורך לעדכן
+                        await _playerService.UpdateAsync(item.Value.player);
                 }
 
             }
