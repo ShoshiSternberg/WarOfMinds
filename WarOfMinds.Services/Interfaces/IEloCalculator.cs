@@ -9,6 +9,6 @@ namespace WarOfMinds.Services.Interfaces
 {
     public interface IEloCalculator
     {
-        public void UpdateRatingOfAllPlayers(int gameID,List<PlayerDTO> playersSortedByScore);//עדכון דירוג כל השחקנים
+        public void UpdateRatingOfAllPlayers(int gameID,List<PlayerDTO> playersSortedByScore, List<int> scors);//עדכון דירוג כל השחקנים
     }
 }

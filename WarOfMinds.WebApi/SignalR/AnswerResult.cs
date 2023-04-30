@@ -12,6 +12,7 @@ namespace WarOfMinds.WebApi.SignalR
         //public int Score { get; set; } לא בטוח שצריך את זה
         public int AnswerTime { get; set; }
         public bool answer { get; set; }
+        public int qNum { get; set; }
         public int CompareTo(AnswerResult other)
         {
             // First, compare by Score

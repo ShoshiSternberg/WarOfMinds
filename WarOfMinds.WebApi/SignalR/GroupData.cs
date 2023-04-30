@@ -6,6 +6,6 @@ namespace WarOfMinds.WebApi.SignalR
     {
         public GameDTO game { get; set; }
         public List<Question> questions { get; set; }
-        public Dictionary<int, List<AnswerResult>> gameResults { get; set; }
+        public  List<AnswerResult> gameResults { get; set; }//ליסט של תשובות- הוא מתרוקן בסיום כל שאלה.
     }
 }

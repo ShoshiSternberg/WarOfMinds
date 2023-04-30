@@ -28,7 +28,8 @@ namespace WarOfMinds.Services.Services
 
     public class EloCalculator : IEloCalculator
     {
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _EloCalculatorConfiguration;
+        private readonly IConfiguration _TriviaHubConfiguration;
         private readonly IGameService _gameService;
         private readonly IPlayerService _playerService;
         private readonly IDictionary<int, PlayerForCalcRating> _players;
@@ -38,102 +39,108 @@ namespace WarOfMinds.Services.Services
         public GameService Game { get; set; }
         public EloCalculator(IConfiguration configuration, IGameService gameService, IPlayerService playerService, IDictionary<int, PlayerForCalcRating> players)//צריל לקבל את הערכים או להשלים אותם לבד
         {
-            _configuration = configuration.GetSection("EloCalculator");
+            _EloCalculatorConfiguration = configuration.GetSection("EloCalculator");
+            _TriviaHubConfiguration = configuration.GetSection("TriviaHub");
             _gameService = gameService;
             _playerService = playerService;
-            _d = Convert.ToInt32(_configuration["d"]);//400
-            _Base = Convert.ToInt32(_configuration["base"]);//1 בסיס 1 לפונקציה לינארית, גבוה יותר לפונקציה מעריכית
-            _k = Convert.ToInt32(_configuration["k"]);//32
+            _d = Convert.ToInt32(_EloCalculatorConfiguration["d"]);//400
+            _Base = Convert.ToInt32(_EloCalculatorConfiguration["base"]);//1 בסיס 1 לפונקציה לינארית, גבוה יותר לפונקציה מעריכית
+            _k = Convert.ToInt32(_EloCalculatorConfiguration["k"]);//32
             _players = players;
         }
 
-        private async Task Init(int gameID, List<PlayerDTO> playersSortedByScore)
+        private async Task Init(int gameID, List<PlayerDTO> playersSortedByScore,List<int> scores)
         {
             if(playersSortedByScore.Count ==1)//אם שחקן משחק לבד, אפשר להניח שיש לו יריב וירטואלי עם דרוג זהה לדרוג הקודם שלו
             {
                 PlayerDTO p=new PlayerDTO();
                 p.PlayerID = 0;
                 p.PlayerName = "virtual";
-                p.ELORating = playersSortedByScore[0].ELORating;
-                if(p.)
-                PlayerForCalcRating p1=new PlayerForCalcRating(p,0,0);
+                p.ELORating = playersSortedByScore[0].ELORating;                                  
+                PlayerForCalcRating p1=new PlayerForCalcRating(p,0,0);//אם הוא נכשל מול עצמו היריב הוירטואלי מקבל את כל הנקודות- מס השאלות כפול מספר השניות לכל שאלה
+                if (scores[0] == 0)
+                    p1.scoreForPlacementPosition =Convert.ToInt32(_TriviaHubConfiguration["NumOfQuestions"])* Convert.ToInt32(_TriviaHubConfiguration["TimeToAnswer"]);
+                _players.Add(0, p1);
             }
+
             GameDTO game = await _gameService.GetByIdAsync(gameID);//זה אמור להיות כל השחקנים מהדאטה בייס
-            List<PlayerDTO> playersFromDB = game.Players.ToList<PlayerDTO>();
-            List<PlayerForCalcRating> players = new List<PlayerForCalcRating>();
+            List<PlayerDTO> playersFromDB = (List<PlayerDTO>)game.Players;            
             for (int i = 0; i < playersFromDB.Count; i++)
             {
-                _players.Add(playersFromDB[i].PlayerID, new PlayerForCalcRating(playersFromDB[i], 0, 0));
+                _players.Add(playersFromDB[i].PlayerID, new PlayerForCalcRating(playersFromDB[i], scores[i], 0));
 
             }
         }
 
 
-        public async void UpdateRatingOfAllPlayers(int gameID, List<PlayerDTO> playersSortedByScore)
+        public async void UpdateRatingOfAllPlayers(int gameID, List<PlayerDTO> playersSortedByScore, List<int> scores)
         {
-            Init(gameID, playersSortedByScore);
+            await Init(gameID, playersSortedByScore, scores);
             int NumOfPlayers = _players.Count;
-            if (NumOfPlayers < 0)
+            if (NumOfPlayers < 2)
             {
-                return;
-            }
+                throw (new Exception("There are no players"));
 
-            //שלב א- חישוב ההסתברות
-            double sumOfPlayersProbabilities = (NumOfPlayers * (NumOfPlayers - 1)) / 2;
-            foreach (var player in _players)
-            {
-                double currentPlayerWinProbability = 0;
-                foreach (var opponent in _players)
-                {
-                    if (player.Key != opponent.Key)
-                    {
-                        double probabilityToWinAgainstJ = probabilityToWinAgainst(player.Value.player.ELORating, opponent.Value.player.ELORating);
-                        currentPlayerWinProbability += probabilityToWinAgainstJ;
-                    }
-                }
-                double scaledCurrentPlayerWinProbability = currentPlayerWinProbability / sumOfPlayersProbabilities;
-
-                player.Value.probability = scaledCurrentPlayerWinProbability;
-            }
-            //עכשיו יש לכל שחקן שרשום בדאטה בייס שדה במילון שבו רשום את הציון שחזו לו במשחק הזה
-
-            //שלב ב - חישוב הציון בפועל
-
-
-            //כאן עוברים על המערך של המיקומים
-            //לכן אי אפשר לכתוב מספר השחקנים כי יתכן שלא כולם ענו
-            double exponentialDivider;
-            if (_Base > 1)
-            {
-                exponentialDivider = 0;
-                for (int i = 1; i < playersSortedByScore.Count; i++)
-                {
-                    exponentialDivider += (Math.Pow(_Base, (playersSortedByScore.Count - i)) - 1);
-                }
-                for (int i = 1; i < playersSortedByScore.Count; i++)
-                {
-                    double score = ((Math.Pow(_Base, (playersSortedByScore.Count - i)) - 1)) / exponentialDivider;
-                    _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition = score;
-                }
             }
             else
             {
-                for (int i = 0; i < playersSortedByScore.Count; i++)
+                //שלב א- חישוב ההסתברות
+                double sumOfPlayersProbabilities = (NumOfPlayers * (NumOfPlayers - 1)) / 2;
+                foreach (var player in _players)
                 {
-                    double score = (playersSortedByScore.Count - i) / ((playersSortedByScore.Count * (playersSortedByScore.Count - 1)) / 2);
-                    _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition = score;
+                    double currentPlayerWinProbability = 0;
+                    foreach (var opponent in _players)
+                    {
+                        if (player.Key != opponent.Key)
+                        {
+                            double probabilityToWinAgainstJ = probabilityToWinAgainst(player.Value.player.ELORating, opponent.Value.player.ELORating);
+                            currentPlayerWinProbability += probabilityToWinAgainstJ;
+                        }
+                    }
+                    double scaledCurrentPlayerWinProbability = currentPlayerWinProbability / sumOfPlayersProbabilities;
 
+                    player.Value.probability = scaledCurrentPlayerWinProbability;
                 }
-            }
+                //עכשיו יש לכל שחקן שרשום בדאטה בייס שדה במילון שבו רשום את הציון שחזו לו במשחק הזה
 
-            //שלב ג - עדכון הדירוג
-            foreach (var item in _players)
-            {
-                double newEloRating = Math.Round(item.Value.player.ELORating + _k * (NumOfPlayers - 1) * (item.Value.scoreForPlacementPosition - item.Value.probability));
-                item.Value.player.ELORating = (int)newEloRating;
-                await _playerService.UpdateAsync(item.Value.player);
-            }
+                //שלב ב - חישוב הציון בפועל
 
+
+                //כאן עוברים על המערך של המיקומים
+                //לכן אי אפשר לכתוב מספר השחקנים כי יתכן שלא כולם ענו
+                double exponentialDivider;
+                if (_Base > 1)
+                {
+                    exponentialDivider = 0;
+                    for (int i = 1; i < playersSortedByScore.Count; i++)
+                    {
+                        exponentialDivider += (Math.Pow(_Base, _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition));
+                    }
+                    for (int i = 1; i < playersSortedByScore.Count; i++)
+                    {
+                        double score = ((Math.Pow(_Base, _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition) - 1)) / exponentialDivider;
+                        _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition = score;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < playersSortedByScore.Count; i++)
+                    {
+                        double score = (playersSortedByScore.Count - i) / ((playersSortedByScore.Count * (playersSortedByScore.Count - 1)) / 2);
+                        _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition = score;
+
+                    }
+                }
+
+                //שלב ג - עדכון הדירוג
+                foreach (var item in _players)
+                {
+                    double newEloRating = Math.Round(item.Value.player.ELORating + _k * (NumOfPlayers - 1) * (item.Value.scoreForPlacementPosition - item.Value.probability));
+                    item.Value.player.ELORating = (int)newEloRating;
+                    await _playerService.UpdateAsync(item.Value.player);
+                }
+
+            }
         }
 
 
