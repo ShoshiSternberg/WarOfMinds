@@ -1,21 +1,8 @@
-﻿using Microsoft.Identity.Client.Extensibility;
-using System;
-using System.Collections.Generic;
-using WarOfMinds.Common.DTO;
-using WarOfMinds.Repositories.Entities;
-using WarOfMinds.Services.Services;
-using Microsoft.Extensions.Primitives;
+﻿using WarOfMinds.Common.DTO;
 using WarOfMinds.Services.Interfaces;
-using System.Numerics;
-using System.Xml.Linq;
-using Microsoft.Net.Http.Headers;
 using Microsoft.AspNetCore.Mvc;
 using RestSharp;
-using static Azure.Core.HttpHeader;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Collections.Immutable;
-using System.Linq;
 using System.Data;
 using Microsoft.AspNetCore.SignalR;
 
@@ -33,7 +20,8 @@ namespace WarOfMinds.WebApi.SignalR
         private readonly IDictionary<string, GroupData> _groupData;
         private readonly IHubContext<TriviaHub> _hubContext;
 
-        public TriviaHub(IGameService gameService, IPlayerService playerService, ISubjectService subjectService, IEloCalculator eloCalculator, IDictionary<string, UserConnection> connections, IDictionary<string, GroupData> groupData, IHubContext<TriviaHub> hubContext)
+        public TriviaHub(IGameService gameService, IPlayerService playerService, ISubjectService subjectService,
+            IEloCalculator eloCalculator, IDictionary<string, UserConnection> connections, IDictionary<string, GroupData> groupData, IHubContext<TriviaHub> hubContext)
         {
             _gameService = gameService;
             _playerService = playerService;
@@ -45,14 +33,15 @@ namespace WarOfMinds.WebApi.SignalR
             GameJoined += async (sender, e) =>
             {
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "the IHubContext is calling for you");
-                if (_groupData[$"game_{e.GameID}"].questions == null)
+
+                if (_groupData[$"game_{e.GameID}"].questions == null)//זה אומר שזו הפעם הראשונה שבוחרים את הנושא- תחילת המשחק
                 {
-                    await GetQuestionsAsync(e.GameID,e.SubjectID, _gameService.Difficulty(e.Rating));
+                    await GetQuestionsAsync(e.GameID, e.SubjectID, _gameService.Difficulty(e.Rating));
                     //מיד אחרי שמכניסים את השאלות, מתחילים את המשחק 
 
                     await Task.Run(async () =>
                     {
-                        // Simulate some work
+
                         await Execute(e);
                     });
 
@@ -61,6 +50,8 @@ namespace WarOfMinds.WebApi.SignalR
             };
             _hubContext = hubContext;
         }
+
+        //יצירה וטיפול באירוע של הצטרפות למשחק
         public delegate void GameEventHandler(object sender, GameDTO e);
 
         public event GameEventHandler GameJoined;
@@ -75,34 +66,19 @@ namespace WarOfMinds.WebApi.SignalR
         {
             PlayerDTO player = await _playerService.GetByIdAsync(playerId);
             SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
-            //בהערה עד שהאפדייט יעבוד ואז לשנות גם את הגיים אי די
+
             GameDTO game = await _gameService.FindGameAsync(subject, player);
-            //GameDTO game =await _gameService.GetByIdAsync(3);//בינתיים שולף ולא מעדכן
-            // Add player to game's SignalR group
 
             await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{game.GameID}");
-            
             _connections.Add(Context.ConnectionId, new UserConnection(player, game.GameID));
             if (!(_groupData.ContainsKey($"game_{game.GameID}")))
                 _groupData.Add($"game_{game.GameID}", new GroupData());
+
             _groupData[$"game_{game.GameID}"].game = game;//עדכון המשחק בקבוצה שלו
-            // Send a message to the group            
             await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} has joined the game{game.GameID} in subject {subject.Subjectname}.");
-            //onJoinGame
             OnGameJoined(game);
-            //מילוי השאלות רק בפעם הראשונה
-            //if (_groupData[$"game_{game.GameID}"].questions == null)
-            //{
-            //    await GetQuestionsAsync(subject.SubjectID, _gameService.Difficulty(game.Rating));
-            //    //מיד אחרי שמכניסים את השאלות, מתחילים את המשחק 
 
-            //    await Task.Run(async () =>
-            //    {
-            //        // Simulate some work
-            //        await Execute();
-            //    });
 
-            //}
             Console.WriteLine("after the join game");
 
         }
@@ -112,7 +88,7 @@ namespace WarOfMinds.WebApi.SignalR
 
         //קבלת השאלות מהרשת, המרה לליסט של אובייקטים מסוג שאלה
         [HttpGet("{subject},{diffuculty}", Name = "GetRanking")]
-        public async Task GetQuestionsAsync(int gameId,int subject, string difficulty)
+        public async Task GetQuestionsAsync(int gameId, int subject, string difficulty)
         {
             try
             {
@@ -134,7 +110,7 @@ namespace WarOfMinds.WebApi.SignalR
                 }
                 _groupData[$"game_{gameId}"].questions = questionsList.results;
                 // Set questionId for each Question object
-                int questionId = 1;
+                int questionId = 0;
                 foreach (var question in questionsList.results)
                 {
                     question.questionId = questionId++;
@@ -163,12 +139,12 @@ namespace WarOfMinds.WebApi.SignalR
                     await DisplayQuestionAsync(game.GameID, item);
                     //כאן השהיה של כמה שניות לקבלת התשובות
 
-                    await Task.Delay(5000);
+                    await Task.Delay(10000);
 
                     //שולח את התשובה לכל השחקנים
                     //חישוב הניקוד של השאלה הזו עבור כל השחקנים
-                    string winner = SortPlayersByAnswers(game.GameID,item.questionId);
-                    await ReceiveAnswerAndWinner(game.GameID,winner, item);
+                    string winner = SortPlayersByAnswers(game.GameID, item.questionId);
+                    await ReceiveAnswerAndWinner(game.GameID, winner, item);
                 }
                 await Scoring(game.GameID);
             }
@@ -178,36 +154,30 @@ namespace WarOfMinds.WebApi.SignalR
             }
         }
 
-        public string SortPlayersByAnswers(int gameId,int qNum)
+        public string SortPlayersByAnswers(int gameId, int qNum)
         {
-            
-
             if (_groupData[$"game_{gameId}"].gameResults != null)
             {
                 if (_groupData[$"game_{gameId}"].gameResults.ContainsKey(qNum))
                 {
+                    //ברשימה הזו יש רק את מי שענה נכון על השאלה. צריך למיין את הרשימה לפי זמן מענה, לראות מי המנצח ולעדכן לכל השחקנים את כל הניקודים.
                     List<AnswerResult> answers = _groupData[$"game_{gameId}"].gameResults[qNum];
                     answers.Sort();//מיון התשובות לפי נכונות וזמן
                     //עדכון הנקודות של כל שחקן על השאלה הזו- לפי המיקום שלו במערך. אם הוא ענה לא נכון
                     //הניקוד הוא 0
-                    int j;
-                    for (j = 0; answers[j].answer == true; j++) ;//סופר כמה ענו נכון
-                    for (int i = 0; i < answers.Count; i++)
+                    int j = answers.Count;
+                    foreach (AnswerResult answer in answers)
                     {
-                        if (answers[i].answer == true)
-                            _connections[answers[i].connectionId].score += j--;//ימ שענה הכי מהר מקבל הכי הרבה נקודות
+                        _connections[answer.connectionId].score += j--;
+                    }
+                    return answers[0].player.PlayerName;//שליפת השם של השחקן המנצח
 
-                    }
-                    if (answers[0].answer == true)//רק אם הוא באמת ענה נכון- יתכן שכל התשובות לא היו נכונות
-                    {
-                        return answers[0].player.PlayerName;//שליפת השם של השחקן המנצח
-                    }
                 }
             }
             return "No one answered this question correctly :(";
         }
 
-        public async Task ReceiveAnswerAndWinner(int gameId,string winner, Question q)
+        public async Task ReceiveAnswerAndWinner(int gameId, string winner, Question q)
         {
             //כדאי לשלוח את השם של השחקן שענה נכון ראשון
 
@@ -219,30 +189,39 @@ namespace WarOfMinds.WebApi.SignalR
 
         public async Task GetAnswerAsync(int qNum, string answer, int time)
         {
-            Question q = _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum];
-            AnswerResult result = new AnswerResult();
-            result.answer = result.IsCorrect(q.correct_answer, answer);
-            result.connectionId = Context.ConnectionId;
-            result.player = _connections[Context.ConnectionId].player;
-            result.AnswerTime = time;//ההפרש בין הזמן שהוא קיבל את השאלה לבין הזמן שהוא שלח את התשובה.
-            if (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults == null)
+            try
             {
-                //if it is the first question, we have to create a new dictionary
-                _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults = new Dictionary<int, List<AnswerResult>>();
+                Question q = _groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum];
+                if (q.correct_answer == answer)
+                {
+                    AnswerResult result = new AnswerResult();
+                    result.connectionId = Context.ConnectionId;
+                    result.player = _connections[Context.ConnectionId].player;
+                    result.AnswerTime = time;//ההפרש בין הזמן שהוא קיבל את השאלה לבין הזמן שהוא שלח את התשובה.
+                    if (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults == null)
+                    {
+                        //if it is the first question, we have to create a new dictionary
+                        _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults = new Dictionary<int, List<AnswerResult>>();
+                    }
+
+                    if (!_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults.ContainsKey(qNum))
+                    {
+                        // If the key does not exist in the dictionary, create a new list and add it to the dictionary
+                        _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults[qNum] = new List<AnswerResult>();
+                    }
+
+                    // Add the AnswerResult object to the list at the specified key
+                    _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults[qNum].Add(result);
+
+                }
+                //שולחים לו מייד אם ענה נכון או לא
+                await Clients.Caller.SendAsync("ReceiveAnswerAndWinner", $" Your answer has been captured in the system [{q.correct_answer == answer}], the correct answer is:{_groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum].correct_answer}");
             }
-
-            if (!_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults.ContainsKey(qNum))
-            {
-                // If the key does not exist in the dictionary, create a new list and add it to the dictionary
-                _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults[qNum] = new List<AnswerResult>();
+            catch (Exception e) {
+                Console.WriteLine(e);
             }
-
-
-            // Add the AnswerResult object to the list at the specified key
-            _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults[qNum].Add(result);
-            //שולחים לו מייד אם ענה נכון או לא
-            await Clients.Caller.SendAsync("ReceiveAnswerAndWinner", $" Your answer has been captured in the system [{result.answer}], the correct answer is:{_groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum].correct_answer}");
         }
+
 
 
 
@@ -253,7 +232,7 @@ namespace WarOfMinds.WebApi.SignalR
             //המנצח הוא מי שקיבל הכי הרבה נקודות
             List<PlayerDTO> players = _groupData[$"game_{gameId}"].game.Players.ToList<PlayerDTO>();
             players = players.OrderBy(p => GetScoreByPlayerID(p.PlayerID)).ToList();
-            await DisplayWinnerAndEndGameAsync(gameId,players[0].PlayerName);
+            await DisplayWinnerAndEndGameAsync(gameId, players[0].PlayerName);
 
             _eloCalculator.UpdateRatingOfAllPlayers(gameId, players);
             //איכשהו לשלוח לשחקן את הציון המעודכן שלו.
@@ -270,20 +249,27 @@ namespace WarOfMinds.WebApi.SignalR
             return userConnection.score;
         }
 
-        //פונקציה שמפעיל הקליינט לקבלת שאלה
+        //פונקציה שהקליינט  מוכן אליה לקבלת שאלה
         [HubMethodName("ReceiveQuestion")]
-        private async Task DisplayQuestionAsync(int gameId,Question question)
+        private async Task DisplayQuestionAsync(int gameId, Question question)
         {
             //שולח את השאלה בלי התשובה
-            question.correct_answer = null;
+            //question.correct_answer = null;
+            Question q=new Question();
+            q.question = question.question;
+            q.questionId= question.questionId;
+            q.incorrect_answers = question.incorrect_answers;
+            q.difficulty= question.difficulty;
+            q.category= question.category;
+            
             //שליחת השאלה לכל השחקנים
             // Send a message to the group
-            await _hubContext.Clients.Group($"game_{gameId}").SendAsync("ReceiveQuestion", question);
+            await _hubContext.Clients.Group($"game_{gameId}").SendAsync("ReceiveQuestion", q);
 
         }
-        // פונקציה שמפעיל הקליינט לקבלת תוצאות המשחק
+        // פונקציה  שהקליינט מתכונן אליה לקבלת תוצאות המשחק
         [HubMethodName("ReceiveWinnerAndGameEnd")]
-        private async Task DisplayWinnerAndEndGameAsync(int gameId,string p1)
+        private async Task DisplayWinnerAndEndGameAsync(int gameId, string p1)
         {
             //שליחת המנצחים
             await _hubContext.Clients.Group($"game_{gameId}").SendAsync("ReceiveQuestion", $"first place: {p1} ");

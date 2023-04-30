@@ -13,10 +13,10 @@ namespace WarOfMinds.Services.Services
 {
     public class PlayerForCalcRating
     {
-        public PlayerForCalcRating(PlayerDTO player,double scoreForPlacementPosition,int newEloRating)
+        public PlayerForCalcRating(PlayerDTO player, double scoreForPlacementPosition, int newEloRating)
         {
             this.player = player;
-            this.scoreForPlacementPosition= scoreForPlacementPosition;
+            this.scoreForPlacementPosition = scoreForPlacementPosition;
             this.newEloRating = newEloRating;
         }
         public PlayerDTO player { get; set; }
@@ -47,14 +47,23 @@ namespace WarOfMinds.Services.Services
             _players = players;
         }
 
-        private async void Init(int gameID, List<PlayerDTO> playersSortedByScore)
-        {            
+        private async Task Init(int gameID, List<PlayerDTO> playersSortedByScore)
+        {
+            if(playersSortedByScore.Count ==1)//אם שחקן משחק לבד, אפשר להניח שיש לו יריב וירטואלי עם דרוג זהה לדרוג הקודם שלו
+            {
+                PlayerDTO p=new PlayerDTO();
+                p.PlayerID = 0;
+                p.PlayerName = "virtual";
+                p.ELORating = playersSortedByScore[0].ELORating;
+                if(p.)
+                PlayerForCalcRating p1=new PlayerForCalcRating(p,0,0);
+            }
             GameDTO game = await _gameService.GetByIdAsync(gameID);//זה אמור להיות כל השחקנים מהדאטה בייס
             List<PlayerDTO> playersFromDB = game.Players.ToList<PlayerDTO>();
             List<PlayerForCalcRating> players = new List<PlayerForCalcRating>();
             for (int i = 0; i < playersFromDB.Count; i++)
             {
-                _players.Add(playersFromDB[i].PlayerID, new PlayerForCalcRating(playersFromDB[i],0,0));
+                _players.Add(playersFromDB[i].PlayerID, new PlayerForCalcRating(playersFromDB[i], 0, 0));
 
             }
         }
@@ -70,30 +79,31 @@ namespace WarOfMinds.Services.Services
             }
 
             //שלב א- חישוב ההסתברות
-            double sumOfPlayersPropabilities = (NumOfPlayers * (NumOfPlayers - 1)) / 2;
+            double sumOfPlayersProbabilities = (NumOfPlayers * (NumOfPlayers - 1)) / 2;
             foreach (var player in _players)
             {
-                double currentPlayerWinPropability = 0;
+                double currentPlayerWinProbability = 0;
                 foreach (var opponent in _players)
                 {
                     if (player.Key != opponent.Key)
                     {
-                        double propabilityToWinAgainstJ = probabilityToWinAgainst(player.Value.player.ELORating, opponent.Value.player.ELORating);
-                        currentPlayerWinPropability += propabilityToWinAgainstJ;
+                        double probabilityToWinAgainstJ = probabilityToWinAgainst(player.Value.player.ELORating, opponent.Value.player.ELORating);
+                        currentPlayerWinProbability += probabilityToWinAgainstJ;
                     }
                 }
-                double scaledCurrentPlayerWinPropability = currentPlayerWinPropability / sumOfPlayersPropabilities;
+                double scaledCurrentPlayerWinProbability = currentPlayerWinProbability / sumOfPlayersProbabilities;
 
-                player.Value.probability = scaledCurrentPlayerWinPropability;
+                player.Value.probability = scaledCurrentPlayerWinProbability;
             }
             //עכשיו יש לכל שחקן שרשום בדאטה בייס שדה במילון שבו רשום את הציון שחזו לו במשחק הזה
 
             //שלב ב - חישוב הציון בפועל
-            double exponentialDivider;           
-            
-           //כאן עוברים על המערך של המיקומים
-           //לכן אי אפשר לכתוב מספר השחקנים כי יתכן שלא כולם ענו
-            if (_Base > 1)                
+
+
+            //כאן עוברים על המערך של המיקומים
+            //לכן אי אפשר לכתוב מספר השחקנים כי יתכן שלא כולם ענו
+            double exponentialDivider;
+            if (_Base > 1)
             {
                 exponentialDivider = 0;
                 for (int i = 1; i < playersSortedByScore.Count; i++)

@@ -7,7 +7,7 @@ namespace WarOfMinds.WebApi.SignalR
     public class AnswerResult : IComparable<AnswerResult>
     {
 
-        public string connectionId { get; set;}
+        public string connectionId { get; set; }
         public PlayerDTO player { get; set; }
         //public int Score { get; set; } לא בטוח שצריך את זה
         public int AnswerTime { get; set; }
@@ -15,12 +15,12 @@ namespace WarOfMinds.WebApi.SignalR
         public int CompareTo(AnswerResult other)
         {
             // First, compare by Score
-            if (this.answer != other.answer)
-            {
-                // Items with Score = true come first
-                return this.answer ? -1 : 1;
-            }
-            else
+            //if (this.answer != other.answer)
+            //{
+            //    // Items with Score = true come first
+            //    return this.answer ? -1 : 1;
+            //}
+            //else
             {
                 return this.AnswerTime.CompareTo(other.AnswerTime);
             }
@@ -29,7 +29,7 @@ namespace WarOfMinds.WebApi.SignalR
         public bool IsCorrect(string correct_answer, string playerAnswer)
         {
             return correct_answer == playerAnswer;
-        } 
+        }
     }
 
 }

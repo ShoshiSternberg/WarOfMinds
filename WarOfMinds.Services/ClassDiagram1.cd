@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="WarOfMinds.Services.Services.PlayerForCalcRating">
+    <Position X="2.75" Y="0.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEAAAAAgAAAAAAAAAAAAAARAAAAAAAAAAA=</HashCode>
+      <FileName>Services\EloCalculator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WarOfMinds.Services.Services.EloCalculator">
+    <Position X="0.5" Y="0.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>ACAAgAAAAAAAAAAAAgAAAAAAABgAAAAAASMSAAAAAAA=</HashCode>
+      <FileName>Services\EloCalculator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="WarOfMinds.Services.Services.GameService">
+    <Position X="5.25" Y="0.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAgAQEAAAQxAAEAAAAAAEgAACAAAAAEIAA=</HashCode>
+      <FileName>Services\GameService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="WarOfMinds.Services.Services.PlayerService">
+    <Position X="8.5" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAgAAAAAAABAAFAAAAAAAgAAAAAAAAAIAA=</HashCode>
+      <FileName>Services\PlayerService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="WarOfMinds.Services.Services.SubjectService">
+    <Position X="10.5" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAgAAAAAAADAAEAAAAAAAgAAAAAAAQAIAA=</HashCode>
+      <FileName>Services\SubjectService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
