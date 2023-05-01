@@ -22,21 +22,6 @@ namespace WarOfMinds.Context.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("GamePlayer", b =>
-                {
-                    b.Property<int>("GamesGameID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlayersPlayerID")
-                        .HasColumnType("int");
-
-                    b.HasKey("GamesGameID", "PlayersPlayerID");
-
-                    b.HasIndex("PlayersPlayerID");
-
-                    b.ToTable("GamePlayer");
-                });
-
             modelBuilder.Entity("WarOfMinds.Repositories.Entities.Game", b =>
                 {
                     b.Property<int>("GameID")
@@ -69,21 +54,17 @@ namespace WarOfMinds.Context.Migrations
 
             modelBuilder.Entity("WarOfMinds.Repositories.Entities.GamePlayer", b =>
                 {
-                    b.Property<int>("GamePlayerID")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("PlayerId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GamePlayerID"));
-
-                    b.Property<int>("GameID")
+                    b.Property<int>("GameId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PlayerID")
-                        .HasColumnType("int");
+                    b.HasKey("PlayerId", "GameId");
 
-                    b.HasKey("GamePlayerID");
+                    b.HasIndex("GameId");
 
-                    b.ToTable("GamePlayers");
+                    b.ToTable("GamePlayer");
                 });
 
             modelBuilder.Entity("WarOfMinds.Repositories.Entities.Player", b =>
@@ -133,21 +114,6 @@ namespace WarOfMinds.Context.Migrations
                     b.ToTable("Subjects");
                 });
 
-            modelBuilder.Entity("GamePlayer", b =>
-                {
-                    b.HasOne("WarOfMinds.Repositories.Entities.Game", null)
-                        .WithMany()
-                        .HasForeignKey("GamesGameID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WarOfMinds.Repositories.Entities.Player", null)
-                        .WithMany()
-                        .HasForeignKey("PlayersPlayerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("WarOfMinds.Repositories.Entities.Game", b =>
                 {
                     b.HasOne("WarOfMinds.Repositories.Entities.Subject", "Subject")
@@ -157,6 +123,35 @@ namespace WarOfMinds.Context.Migrations
                         .IsRequired();
 
                     b.Navigation("Subject");
+                });
+
+            modelBuilder.Entity("WarOfMinds.Repositories.Entities.GamePlayer", b =>
+                {
+                    b.HasOne("WarOfMinds.Repositories.Entities.Game", "PGame")
+                        .WithMany("Players")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WarOfMinds.Repositories.Entities.Player", "GPlayer")
+                        .WithMany("Games")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GPlayer");
+
+                    b.Navigation("PGame");
+                });
+
+            modelBuilder.Entity("WarOfMinds.Repositories.Entities.Game", b =>
+                {
+                    b.Navigation("Players");
+                });
+
+            modelBuilder.Entity("WarOfMinds.Repositories.Entities.Player", b =>
+                {
+                    b.Navigation("Games");
                 });
 #pragma warning restore 612, 618
         }

@@ -48,7 +48,8 @@ builder.Services.AddDbContext<IContext, DataContext>(options =>
     options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB");
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 
-},ServiceLifetime.Singleton);
+},ServiceLifetime.Scoped);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

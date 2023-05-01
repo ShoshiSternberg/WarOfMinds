@@ -14,10 +14,25 @@ namespace WarOfMinds.Services
     {
         public MappingProfile()
         {
-            CreateMap<GameDTO, Game>().ReverseMap();
-            CreateMap<PlayerDTO, Player>().ReverseMap();
-            
+            //CreateMap<GameDTO, Game>().ReverseMap().ForMember(dest => dest.Players, opt => opt.MapFrom(src => src.Players)); 
+            //CreateMap<PlayerDTO, Player>().ReverseMap().ForMember(dest => dest.Games, opt => opt.MapFrom(src => src.Games));            
             CreateMap<SubjectDTO, Subject>().ReverseMap();
+            
+
+            CreateMap<Game, GameDTO>()
+      .ForMember(d => d.Players, opt => opt.MapFrom(s => s.Players.Select(c => c.GPlayer)))
+      .ReverseMap()
+      .ForMember(d => d.Players, opt => opt.MapFrom(s => s.Players
+          .Select(c => new GamePlayer { GameId = s.GameID, PlayerId = c.PlayerID })));
+           
+            
+            CreateMap<Player, PlayerDTO>()
+      .ForMember(d => d.Games, opt => opt.MapFrom(s => s.Games.Select(c => c.PGame)))
+      .ReverseMap()
+      .ForMember(d => d.Games, opt => opt.MapFrom(s => s.Games
+          .Select(c => new GamePlayer { GameId = c.GameID, PlayerId = s.PlayerID})));
+
+
         }
     }
 }

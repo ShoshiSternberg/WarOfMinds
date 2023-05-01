@@ -37,12 +37,23 @@ namespace WarOfMinds.Context
                             .Property(x => x.SubjectID)
                             .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity<GamePlayer>()
+                .HasKey(pg => new { pg.PlayerId, pg.GameId });
 
+            modelBuilder.Entity<GamePlayer>()
+                .HasOne(pg => pg.GPlayer)
+                .WithMany(p => p.Games)
+                .HasForeignKey(pg => pg.PlayerId);
+
+            modelBuilder.Entity<GamePlayer>()
+                .HasOne(pg => pg.PGame)
+                .WithMany(g => g.Players)
+                .HasForeignKey(pg => pg.GameId);
 
         }
-
-       
-
     }
+
 }
+
+
 

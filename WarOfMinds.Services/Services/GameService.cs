@@ -115,7 +115,7 @@ namespace WarOfMinds.Services.Services
                     GameLength = 30,
                     IsActive = true,
                     Rating = player.ELORating,
-                    Players = new List<PlayerDTO> { player }
+                    Players = new List<PlayerDTO> {player  }
                 };
                 return await AddGameAsync(game);
             }

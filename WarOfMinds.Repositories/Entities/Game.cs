@@ -11,7 +11,7 @@ namespace WarOfMinds.Repositories.Entities
     {
         public Game()
         {
-            this.Players = new HashSet<Player>();
+            this.Players = new HashSet<GamePlayer>();
         }
 
         [Key]
@@ -82,6 +82,6 @@ namespace WarOfMinds.Repositories.Entities
             set { rating = value; }
         }
 
-        public virtual ICollection<Player> Players { get; set; }
+        public virtual ICollection<GamePlayer> Players { get; set; }
     }
 }

@@ -10,9 +10,9 @@ namespace WarOfMinds.Repositories.Entities
 {
     public class GamePlayer
     {
-        [Key]
-        public Game Game { get; set; }
-        [Key] 
-        public Player Player { get; set; }
+        public int GameId { get; set; }
+        public Game PGame { get; set; }
+        public int PlayerId { get; set; }
+        public Player GPlayer { get; set; }
     }
 }

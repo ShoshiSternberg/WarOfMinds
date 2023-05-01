@@ -41,14 +41,10 @@ namespace WarOfMinds.WebApi.SignalR
                 {
                     await GetQuestionsAsync(e.GameID, e.SubjectID, _gameService.Difficulty(e.Rating));
                     //מיד אחרי שמכניסים את השאלות, מתחילים את המשחק 
-
                     await Task.Run(async () =>
                     {
-
                         await Execute(e);
                     });
-
-
                 }
             };
             _hubContext = hubContext;
@@ -86,6 +82,7 @@ namespace WarOfMinds.WebApi.SignalR
 
             _groupData[$"game_{game.GameID}"].game = game;//עדכון המשחק בקבוצה שלו
             await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} has joined the game{game.GameID} in subject {subject.Subjectname}.");
+            
             OnGameJoined(game);
 
 
