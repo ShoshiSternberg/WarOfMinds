@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 using WarOfMinds.Common.DTO;
 using WarOfMinds.Context;
@@ -12,10 +13,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-});
+builder.Services.AddControllers();
+//    .AddJsonOptions(options =>
+//{
+//    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+//});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -47,12 +49,11 @@ builder.Services.Configure<HubOptions>(options =>
 //dictionaries for the hub
 builder.Services.AddSingleton<IDictionary<string, UserConnection>>(opts => new Dictionary<string, UserConnection>());
 builder.Services.AddSingleton<IDictionary<string, GroupData>>(opts => new Dictionary<string, GroupData>());
-builder.Services.AddDbContext<IContext, DataContext>(options =>
+builder.Services.AddDbContextPool<IContext, DataContext>(options =>
 {
     options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB");
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-
-},ServiceLifetime.Scoped);
+});
 
 var app = builder.Build();
 

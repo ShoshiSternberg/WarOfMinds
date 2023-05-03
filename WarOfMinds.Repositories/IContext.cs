@@ -18,7 +18,7 @@ namespace WarOfMinds.Repositories
         DbSet<Subject> Subjects { get; set; }
         DbSet<GamePlayer> GamePlayer { get; set; }
         EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
-        
+        ChangeTracker ChangeTracker { get; }
         int SaveChanges();
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));

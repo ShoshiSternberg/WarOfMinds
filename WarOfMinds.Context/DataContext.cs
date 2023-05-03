@@ -23,12 +23,13 @@ namespace WarOfMinds.Context
         public DataContext(DbContextOptions<DataContext> options)
         : base(options)
         {
+
         }
         public EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class
         {
             return base.Entry(entity);
         }
-
+        public ChangeTracker ChangeTracker => base.ChangeTracker;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Game>()

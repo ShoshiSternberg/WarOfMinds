@@ -37,6 +37,13 @@ namespace WarOfMinds.Repositories.Entities
             get { return playerPassword; }
             set { playerPassword = value; }
         }
+        private string playerEmail;
+
+        public string PlayerEmail
+        {
+            get { return playerEmail; }
+            set { playerEmail = value; }
+        }
 
         private DateTime dateOfRegistration;
 

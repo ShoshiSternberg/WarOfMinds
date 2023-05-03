@@ -32,6 +32,14 @@ namespace WarOfMinds.Common.DTO
             set { playerPassword = value; }
         }
 
+        private string playerEmail;
+
+        public string PlayerEmail
+        {
+            get { return playerEmail; }
+            set { playerEmail = value; }
+        }
+
         private DateTime dateOfRegistration;
 
         public DateTime DateOfRegistration

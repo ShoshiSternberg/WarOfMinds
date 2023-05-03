@@ -259,7 +259,7 @@ namespace WarOfMinds.WebApi.SignalR
                 //בודקים מיהו השחקן שלו הניקוד הכי גבוה
                 //שולחים אותו בתור מנצח
                 //שולחים את כל השחקנים מהדאטה בייס+ את הניקודים שלהם+את הקוד של המשחק לחישוב ניקודים ועדכון דאטה בייס
-
+                GameDTO game=await _gameService.GetByIdAsync(gameId);
                 List<PlayerDTO> players = (await _gameService.GetWholeByIdAsync(gameId)).Players.ToList();
                 List<int> scores = players.Select(p => GetUserConnectionByPlayerID(p).score).ToList();
                 int maxScore = scores.Max();

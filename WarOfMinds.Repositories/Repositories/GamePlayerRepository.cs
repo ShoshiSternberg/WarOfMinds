@@ -46,7 +46,9 @@ namespace WarOfMinds.Repositories.Repositories
                 }
                 var addedGamePlayer = await _context.GamePlayer.AddAsync(GamePlayer);
                 await _context.SaveChangesAsync();
-                _context.Entry(g).State = (Microsoft.EntityFrameworkCore.EntityState)EntityState.Detached;
+                _context.ChangeTracker.Clear();
+                Console.WriteLine("gamePlayerRepository add: \n"+_context.ChangeTracker.DebugView.LongView);
+                //_context.Entry(g).State = (Microsoft.EntityFrameworkCore.EntityState)EntityState.Detached;
                 return addedGamePlayer.Entity;
             }
             catch (Exception ex)

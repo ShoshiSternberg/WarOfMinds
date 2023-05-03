@@ -81,6 +81,10 @@ namespace WarOfMinds.Context.Migrations
                     b.Property<int>("ELORating")
                         .HasColumnType("int");
 
+                    b.Property<string>("PlayerEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PlayerName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
