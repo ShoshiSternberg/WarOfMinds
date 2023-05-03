@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 using RestSharp;
 using RestSharp.Authenticators;
 using System.Linq;
+using WarOfMinds.Repositories.Entities;
 
 namespace WarOfMinds.WebApi.SignalR
 {
@@ -49,7 +50,6 @@ namespace WarOfMinds.WebApi.SignalR
             };
             _hubContext = hubContext;
             _configuration = configuration.GetSection("TriviaHub");
-            _TimeToAnswer = Convert.ToInt32(_configuration["TimeToAnswer"]);
             _TimeToAnswer = _configuration.GetValue<int>("TimeToAnswer");
 
         }
@@ -69,28 +69,50 @@ namespace WarOfMinds.WebApi.SignalR
         {
             PlayerDTO player = await _playerService.GetByIdAsync(playerId);
             SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
-
             GameDTO game = await _gameService.FindGameAsync(subject, player);
             if (game == null)
             {
                 return;
             }
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{game.GameID}");
-            _connections.Add(Context.ConnectionId, new UserConnection(player, game.GameID));
-            if (!(_groupData.ContainsKey($"game_{game.GameID}")))
-                _groupData.Add($"game_{game.GameID}", new GroupData());
+            if (game.Players.Contains(player))
+            {
+                //אם הוא מנסה להצטרף לאותו משחק שוב
+                await Clients.Caller.SendAsync("ReceiveMessage", "You may not join the same game twice!");
+            }
+            else
+            {
+                //אם הוא הראשון שמצטרף למשחק
+                lock (_groupData)
+                {
+                    if (!_groupData.ContainsKey($"game_{game.GameID}"))
+                    {
+                        _groupData.Add($"game_{game.GameID}", new GroupData());
 
-            _groupData[$"game_{game.GameID}"].game = game;//עדכון המשחק בקבוצה שלו
-            await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} has joined the game{game.GameID} in subject {subject.Subjectname}.");
-            
-            OnGameJoined(game);
+                    }
+                }
 
+                lock (_connections)
+                {
+                    _connections.Add(Context.ConnectionId, new UserConnection(player, game.GameID));
+                }
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{game.GameID}");
+                await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} has joined the game{game.GameID} in subject {subject.Subjectname}.");
 
-            Console.WriteLine($"player {player.PlayerID} joined to game {game.GameID}");
-
+                if (_groupData[$"game_{game.GameID}"].IsActive == false)
+                {
+                    _groupData[$"game_{game.GameID}"].IsActive = true;
+                    OnGameJoined(game);
+                }
+                Console.WriteLine($"player {player.PlayerID} joined to game {game.GameID}");
+            }
         }
 
+        public override Task OnDisconnectedAsync(Exception? exception)
+        {
+            Clients.Group($"game_{_connections[Context.ConnectionId].game}").SendAsync("ReceiveMessage", "my app", $"player {_connections[Context.ConnectionId].player.PlayerName} has left the game{_connections[Context.ConnectionId].game}.");
 
+            return base.OnDisconnectedAsync(exception);
+        }
 
 
         //קבלת השאלות מהרשת, המרה לליסט של אובייקטים מסוג שאלה
@@ -203,13 +225,17 @@ namespace WarOfMinds.WebApi.SignalR
                     result.AnswerTime = time;//ההפרש בין הזמן שהוא קיבל את השאלה לבין הזמן שהוא שלח את התשובה.
                     if (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults == null)
                     {
-                        //if it is the first question, we have to create a new dictionary
-                        _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults = new List<AnswerResult>();
+                        lock (_groupData[$"game_{_connections[Context.ConnectionId].game}"])
+                        {
+                            //if it is the first question, we have to create a new dictionary
+                            _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults = new List<AnswerResult>();
+                        }
                     }
-
-                    // Add the AnswerResult object to the list at the specified key
-                    _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults.Add(result);
-
+                    lock (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults)
+                    {
+                        // Add the AnswerResult object to the list at the specified key
+                        _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults.Add(result);
+                    }
                 }
                 //שולחים לו מייד אם ענה נכון או לא
                 await Clients.Caller.SendAsync("ReceiveAnswerAndWinner", $" Your answer has been captured in the system [{q.correct_answer == answer}], the correct answer is:{_groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum].correct_answer}");
@@ -225,26 +251,31 @@ namespace WarOfMinds.WebApi.SignalR
 
         private async Task Scoring(int gameId)
         {
-           
-            //שולפים את רשימת השחקנים מהדאטה בייס
-
-            //יוצרים רשימה של כל הניקודים שהם צברו
-            //בודקים מיהו השחקן שלו הניקוד הכי גבוה
-            //שולחים אותו בתור מנצח
-            //שולחים את כל השחקנים מהדאטה בייס+ את הניקודים שלהם+את הקוד של המשחק לחישוב ניקודים ועדכון דאטה בייס
-            
-            List<PlayerDTO> players = _groupData[$"game_{gameId}"].game.Players.ToList<PlayerDTO>();           
-            List<int> scores=players.Select(p=> GetUserConnectionByPlayerID(p).score).ToList();            
-            int maxScore = scores.Max();
-            if (maxScore > 0)
+            try
             {
-                string winner = players.FirstOrDefault(p => GetUserConnectionByPlayerID(p).score == maxScore).PlayerName;
-                await DisplayWinnerAndEndGameAsync(gameId, winner);
+                //שולפים את רשימת השחקנים מהדאטה בייס
+
+                //יוצרים רשימה של כל הניקודים שהם צברו
+                //בודקים מיהו השחקן שלו הניקוד הכי גבוה
+                //שולחים אותו בתור מנצח
+                //שולחים את כל השחקנים מהדאטה בייס+ את הניקודים שלהם+את הקוד של המשחק לחישוב ניקודים ועדכון דאטה בייס
+
+                List<PlayerDTO> players = (await _gameService.GetWholeByIdAsync(gameId)).Players.ToList();
+                List<int> scores = players.Select(p => GetUserConnectionByPlayerID(p).score).ToList();
+                int maxScore = scores.Max();
+                if (maxScore > 0)
+                {
+                    string winner = players.FirstOrDefault(p => GetUserConnectionByPlayerID(p).score == maxScore).PlayerName;
+                    await DisplayWinnerAndEndGameAsync(gameId, winner);
+                }
+                _eloCalculator.UpdateRatingOfAllPlayers(gameId, players, scores);
+
+                //איכשהו לשלוח לשחקן את הציון המעודכן שלו.
+                //אולי בסיום דרך הקונטרולר
+            }catch(Exception e)
+            {
+                Console.WriteLine(e);
             }
-            _eloCalculator.UpdateRatingOfAllPlayers(gameId, players, scores);
-            
-            //איכשהו לשלוח לשחקן את הציון המעודכן שלו.
-            //אולי בסיום דרך הקונטרולר
         }
 
 
@@ -263,12 +294,15 @@ namespace WarOfMinds.WebApi.SignalR
         [HubMethodName("ReceiveQuestion")]
         private async Task DisplayQuestionAsync(int gameId, Question question)
         {
+            Random rand = new Random();
+            int randomInt = rand.Next(4);//מגרילים מקום לתשובה הנכונה
             //שולח את השאלה בלי התשובה
             //question.correct_answer = null;
             Question q = new Question();
             q.question = question.question;
             q.questionId = question.questionId;
             q.incorrect_answers = question.incorrect_answers;
+            q.incorrect_answers.Insert(randomInt, question.correct_answer);//מוסיפים את  התשובה הנכונה לרשימת התשובות
             q.difficulty = question.difficulty;
             q.category = question.category;
 

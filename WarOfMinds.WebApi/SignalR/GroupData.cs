@@ -5,6 +5,7 @@ namespace WarOfMinds.WebApi.SignalR
     public class GroupData
     {
         public GameDTO game { get; set; }
+        public bool IsActive { get; set; }
         public List<Question> questions { get; set; }
         public List<AnswerResult> gameResults { get; set; }//ליסט של תשובות- הוא מתרוקן בסיום כל שאלה.
     }

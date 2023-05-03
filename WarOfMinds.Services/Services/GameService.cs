@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -57,7 +58,7 @@ namespace WarOfMinds.Services.Services
             return _mapper.Map<GameDTO>(await _gameRepository.GetByIdAsync(id));
 
         }
-        
+
         public async Task<GameDTO> GetWholeByIdAsync(int id)
         {
             return _mapper.Map<GameDTO>(await _gameRepository.GetWholeByIdAsync(id));
@@ -109,28 +110,26 @@ namespace WarOfMinds.Services.Services
                 // Create a new game with the player's rating
                 game = new GameDTO
                 {
+                    SubjectID = subject.SubjectID,
                     Subject = subject,
                     //GameManager = player,
                     GameDate = DateTime.Now,
                     GameLength = 30,
                     IsActive = true,
                     Rating = player.ELORating,
-                    Players = new List<PlayerDTO> {player  }
+                    Players = new List<PlayerDTO>()
                 };
-                return await AddGameAsync(game);
+
+                game = await AddGameAsync(game);
             }
-            else
-            {
-                //apdate game to active
-                game.IsActive = true;
-                // Add player to existing game
-                if (!game.Players.Contains(player))
-                    game.Players.Add(player);
+            //apdate game to active
+            game.IsActive = true;
+            // Add player to existing game
+            if (!game.Players.Contains(player))
+                game.Players.Add(player);
 
-                return await UpdateGameAsync(game.GameID, game);
-            }
-
-
+            game = await UpdateGameAsync(game.GameID, game);
+            return await GetWholeByIdAsync(game.GameID);
         }
 
         public async Task UpdateRating(GameDTO game, int newPlayerRating)

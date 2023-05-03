@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System;
@@ -22,6 +23,10 @@ namespace WarOfMinds.Context
         public DataContext(DbContextOptions<DataContext> options)
         : base(options)
         {
+        }
+        public EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class
+        {
+            return base.Entry(entity);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -49,6 +54,8 @@ namespace WarOfMinds.Context
                 .HasOne(pg => pg.PGame)
                 .WithMany(g => g.Players)
                 .HasForeignKey(pg => pg.GameId);
+
+
 
         }
     }

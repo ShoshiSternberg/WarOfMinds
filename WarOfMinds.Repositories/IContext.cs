@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,8 @@ namespace WarOfMinds.Repositories
 
         DbSet<Subject> Subjects { get; set; }
         DbSet<GamePlayer> GamePlayer { get; set; }
-
+        EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
+        
         int SaveChanges();
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
