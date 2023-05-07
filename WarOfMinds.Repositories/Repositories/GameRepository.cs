@@ -49,7 +49,8 @@ namespace WarOfMinds.Repositories.Repositories
             try
             {
                 return await _context.Games.Include(g => g.Subject).FirstOrDefaultAsync(g => g.GameID == id);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
                 return null;
@@ -99,7 +100,7 @@ namespace WarOfMinds.Repositories.Repositories
                     // Save changes to the database
                     await _context.SaveChangesAsync();
                     _context.ChangeTracker.Clear();
-                    Console.WriteLine("GameRepository update:\n"+_context.ChangeTracker.DebugView.LongView);
+                    Console.WriteLine("GameRepository update:\n" + _context.ChangeTracker.DebugView.LongView);
                     // Return the updated game
                     return game;
                 }
@@ -116,10 +117,10 @@ namespace WarOfMinds.Repositories.Repositories
         }
 
 
-            
+
         public async Task<Game> GetWholeByIdAsync(int id)
         {
-            Game ans= await _context.Games.Include(g => g.Subject).Include(g => g.Players).FirstOrDefaultAsync(g => g.GameID == id);
+            Game ans = await _context.Games.Include(g => g.Subject).Include(g => g.Players).FirstOrDefaultAsync(g => g.GameID == id);
             return ans;
         }
     }

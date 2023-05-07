@@ -49,11 +49,11 @@ builder.Services.Configure<HubOptions>(options =>
 //dictionaries for the hub
 builder.Services.AddSingleton<IDictionary<string, UserConnection>>(opts => new Dictionary<string, UserConnection>());
 builder.Services.AddSingleton<IDictionary<string, GroupData>>(opts => new Dictionary<string, GroupData>());
-builder.Services.AddDbContextPool<IContext, DataContext>(options =>
+builder.Services.AddDbContext<IContext, DataContext>(options =>
 {
     options.UseSqlServer("name=ConnectionStrings:WarOfMindsDB");
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-});
+},ServiceLifetime.Transient);
 
 var app = builder.Build();
 

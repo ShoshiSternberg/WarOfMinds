@@ -138,7 +138,8 @@ namespace WarOfMinds.Services.Services
                     double newEloRating = Math.Round(item.Value.player.ELORating + _k * (NumOfPlayers - 1) * (item.Value.scoreForPlacementPosition - item.Value.probability));
                     item.Value.player.ELORating = (int)newEloRating;
                     if (item.Value.player.PlayerID != 0)//כמובן שאת הוירטואלי אין צורך לעדכן
-                        await _playerService.UpdateAsync(item.Value.player);
+                        //await _playerService.UpdateAsync(item.Value.player);
+                        Console.WriteLine($"player: {item.Key} old score: {item.Value.player.ELORating} probability: {item.Value.probability} new score: {item.Value.newEloRating}");
                 }
 
             }

@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -11,7 +14,9 @@ using System.Xml.Linq;
 using WarOfMinds.Common.DTO;
 using WarOfMinds.Repositories.Entities;
 using WarOfMinds.Repositories.Interfaces;
+using WarOfMinds.Repositories.Repositories;
 using WarOfMinds.Services.Interfaces;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace WarOfMinds.Services.Services
 {
@@ -19,12 +24,13 @@ namespace WarOfMinds.Services.Services
     {
         private readonly IGameRepository _gameRepository;
         private readonly ISubjectService _subjectService;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly IMapper _mapper;
-        public GameService(IGameRepository gameRepository, ISubjectService subjectService, IMapper mapper)
+        public GameService(IGameRepository gameRepository, ISubjectService subjectService, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
         {
             _gameRepository = gameRepository;
             _mapper = mapper;
-
+            _scopeFactory = serviceScopeFactory;
             _subjectService = subjectService;
         }
 
@@ -59,6 +65,23 @@ namespace WarOfMinds.Services.Services
 
         }
 
+        public async Task<GameDTO> GetByIdInNewScopeAsync(int id)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
+                    return _mapper.Map<GameDTO>(await gameRepository.GetWholeByIdAsync(id));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
+
+        }
         public async Task<GameDTO> GetWholeByIdAsync(int id)
         {
             return _mapper.Map<GameDTO>(await _gameRepository.GetWholeByIdAsync(id));
@@ -87,22 +110,16 @@ namespace WarOfMinds.Services.Services
         }
 
 
-
         public async Task<GameDTO> GetActiveGameBySubjectAndRatingAsync(int subjectID, int rating)
         {
-
             return GetAllAsync().Result
-                .Where(g => g.SubjectID == subjectID && g.IsActive && CheckRating(g.Rating, rating))
-                .FirstOrDefault();
-
-
-
+            .Where(g => g.SubjectID == subjectID && g.IsActive && CheckRating(g.Rating, rating))
+            .FirstOrDefault();
         }
 
         //מציאת משחק ועדכונו
         public async Task<GameDTO> FindGameAsync(SubjectDTO subject, PlayerDTO player)
         {
-
             var game = await GetActiveGameBySubjectAndRatingAsync(subject.SubjectID, player.ELORating);
 
             if (game == null)

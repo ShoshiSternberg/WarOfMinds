@@ -19,6 +19,7 @@ namespace WarOfMinds.Services.Interfaces
         Task<GameDTO> GetActiveGameBySubjectAndRatingAsync(int subjectID, int rating);
         Task<GameDTO> AddGameAsync(GameDTO game);
         Task<GameDTO> GetWholeByIdAsync(int id);    
+        Task<GameDTO> GetByIdInNewScopeAsync(int id);    
         string Difficulty(int rating);
     }
         

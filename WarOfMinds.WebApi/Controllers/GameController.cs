@@ -22,7 +22,8 @@ namespace WarOfMinds.WebApi.Controllers
         [HttpGet]
         public async Task<List<GameDTO>> Get()
         {
-            return await _gameService.GetAllAsync();
+             return await _gameService.GetAllAsync();
+            
         }
 
         // GET api/<GameController>/5
