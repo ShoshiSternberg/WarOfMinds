@@ -82,7 +82,7 @@ namespace WarOfMinds.Repositories.Repositories
             try
             {
                 // Get the game to update
-                Game existingGame = _context.Games.Include(g => g.Players).FirstOrDefault(g => g.GameID == game.GameID);
+                Game existingGame = await _context.Games.Include(g => g.Subject).Include(g => g.Players).ThenInclude(g => g.GPlayer).FirstOrDefaultAsync(g => g.GameID == game.GameID);
 
                 if (existingGame != null)
                 {
@@ -120,7 +120,9 @@ namespace WarOfMinds.Repositories.Repositories
 
         public async Task<Game> GetWholeByIdAsync(int id)
         {
-            Game ans = await _context.Games.Include(g => g.Subject).Include(g => g.Players).FirstOrDefaultAsync(g => g.GameID == id);
+            Game ans = await _context.Games.Include(g => g.Subject).Include(g => g.Players).ThenInclude(g=>g.GPlayer).FirstOrDefaultAsync(g => g.GameID == id);
+            _context.ChangeTracker.Clear();
+            Console.WriteLine("GameRepository GetWholeByIdAsync:\n" + _context.ChangeTracker.DebugView.LongView);
             return ans;
         }
     }

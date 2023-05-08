@@ -26,12 +26,14 @@ namespace WarOfMinds.Services.Services
         private readonly ISubjectService _subjectService;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IMapper _mapper;
+        private static readonly object _lock = new object();
         public GameService(IGameRepository gameRepository, ISubjectService subjectService, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
         {
             _gameRepository = gameRepository;
             _mapper = mapper;
             _scopeFactory = serviceScopeFactory;
             _subjectService = subjectService;
+            
         }
 
         public async Task<GameDTO> AddAsync(GameDTO game)
@@ -45,6 +47,7 @@ namespace WarOfMinds.Services.Services
             {
                 game.Subject = await _subjectService.GetByIdAsync(game.SubjectID);
             }
+                      
             return _mapper.Map<GameDTO>(await _gameRepository.AddGameAsync(_mapper.Map<Game>(game)));
         }
 
@@ -112,7 +115,8 @@ namespace WarOfMinds.Services.Services
 
         public async Task<GameDTO> GetActiveGameBySubjectAndRatingAsync(int subjectID, int rating)
         {
-            return GetAllAsync().Result
+            var games =await GetAllAsync();
+            return games
             .Where(g => g.SubjectID == subjectID && g.IsActive && CheckRating(g.Rating, rating))
             .FirstOrDefault();
         }
@@ -120,29 +124,31 @@ namespace WarOfMinds.Services.Services
         //מציאת משחק ועדכונו
         public async Task<GameDTO> FindGameAsync(SubjectDTO subject, PlayerDTO player)
         {
-            var game = await GetActiveGameBySubjectAndRatingAsync(subject.SubjectID, player.ELORating);
-
-            if (game == null)
+            GameDTO game;
+            lock (_lock)
             {
-                // Create a new game with the player's rating
-                game = new GameDTO
-                {
-                    SubjectID = subject.SubjectID,
-                    Subject = subject,
-                    //GameManager = player,
-                    GameDate = DateTime.Now,
-                    GameLength = 30,
-                    IsActive = true,
-                    Rating = player.ELORating,
-                    Players = new List<PlayerDTO>()
-                };
+                game = GetActiveGameBySubjectAndRatingAsync(subject.SubjectID, player.ELORating).Result;
 
-                game = await AddGameAsync(game);
+                if (game == null)
+                {
+                    // Create a new game with the player's rating
+                    game = new GameDTO
+                    {
+                        SubjectID = subject.SubjectID,
+                        Subject = subject,                     
+                        GameDate = DateTime.Now,
+                        GameLength = 30,
+                        IsActive = true,
+                        Rating = player.ELORating,
+                        Players = new List<PlayerDTO>()
+                    };
+                    game = AddGameAsync(game).Result;
+                }
             }
-            //apdate game to active
-            game.IsActive = true;
+            
             // Add player to existing game
-            if (!game.Players.Contains(player))
+            game = await GetWholeByIdAsync(game.GameID);
+            if (!game.Players.Any(p => p.PlayerID == player.PlayerID))
                 game.Players.Add(player);
 
             game = await UpdateGameAsync(game.GameID, game);

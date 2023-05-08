@@ -23,9 +23,9 @@ namespace WarOfMinds.WebApi.SignalR
         private readonly IDictionary<string, UserConnection> _connections;
         private readonly IDictionary<string, GroupData> _groupData;
         private readonly IHubContext<TriviaHub> _hubContext;
-        private readonly IConfiguration _configuration;       
+        private readonly IConfiguration _configuration;
         private readonly int _TimeToAnswer;
-        
+
 
         public TriviaHub(IGameService gameService, IPlayerService playerService, ISubjectService subjectService,
             IEloCalculator eloCalculator, IDictionary<string, UserConnection> connections, IDictionary<string, GroupData> groupData, IHubContext<TriviaHub> hubContext, IConfiguration configuration)
@@ -37,7 +37,7 @@ namespace WarOfMinds.WebApi.SignalR
             _connections = connections;
             _groupData = groupData;
             _hubContext = hubContext;
-           
+
 
             GameJoined += async (sender, e) =>
             {
@@ -45,10 +45,8 @@ namespace WarOfMinds.WebApi.SignalR
                 GameDTO g = await _gameService.GetByIdAsync(e.GameID);
                 if (_groupData[$"game_{e.GameID}"].questions == null)//זה אומר שזו הפעם הראשונה שבוחרים את הנושא- תחילת המשחק
                 {
-                    await GetQuestionsAsync(e.GameID, e.SubjectID, _gameService.Difficulty(e.Rating));
-                    
-                    g = await _gameService.GetByIdAsync(e.GameID);
-                    await Execute(e);                    
+                    await GetQuestionsAsync(e.GameID, e.SubjectID, _gameService.Difficulty(e.Rating));                   
+                    await Execute(e);
                 }
             };
             _hubContext = hubContext;
@@ -76,8 +74,7 @@ namespace WarOfMinds.WebApi.SignalR
             {
                 return;
             }
-           
-            if (game.Players.Contains(player))
+            if (_connections.Values.Any(p => (p.player == player)&&(p.game==game.GameID)))
             {
                 //אם הוא מנסה להצטרף לאותו משחק שוב
                 await Clients.Caller.SendAsync("ReceiveMessage", "You may not join the same game twice!");
@@ -90,21 +87,25 @@ namespace WarOfMinds.WebApi.SignalR
                     if (!_groupData.ContainsKey($"game_{game.GameID}"))
                     {
                         _groupData.Add($"game_{game.GameID}", new GroupData());
-
                     }
                 }
-
-                lock (_connections)
+                //אם הוא הראשון שהצטרף- המשך הטיפול מחוץ לקטע הקריטי
+                if (_groupData[$"game_{game.GameID}"].game == null)
                 {
-                    _connections.Add(Context.ConnectionId, new UserConnection(player, game.GameID));
+                    game.IsActive = true;
+                    _groupData[$"game_{game.GameID}"].game = game;
+                    await _gameService.UpdateGameAsync(game.GameID, _groupData[$"game_{game.GameID}"].game);
                 }
+                //לא צריך לנעול כי בכל מקרה זה מפתחות שונים              
+                    
+                _connections.Add(Context.ConnectionId, new UserConnection(player, game.GameID));
+
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{game.GameID}");
                 await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} has joined the game{game.GameID} in subject {subject.Subjectname}.");
 
                 if (_groupData[$"game_{game.GameID}"].IsActive == false)
                 {
                     _groupData[$"game_{game.GameID}"].IsActive = true;
-                    
                     OnGameJoined(game);
                 }
                 Console.WriteLine($"player {player.PlayerID} joined to game {game.GameID}");
@@ -124,10 +125,10 @@ namespace WarOfMinds.WebApi.SignalR
         public async Task GetQuestionsAsync(int gameId, int subject, string difficulty)
         {
             try
-            {                
+            {
                 subject = 21;//למחוק את זה , צריך לשלוח רק אי די גדול מ11
                 int amount = 10;//מספר השאלות            
-                var client = new RestClient($"https://opentdb.com/api.php?amount={amount}&category={subject}&difficulty={difficulty}");                
+                var client = new RestClient($"https://opentdb.com/api.php?amount={amount}&category={subject}&difficulty={difficulty}");
                 var request = new RestRequest("", Method.Get);
                 RestResponse response = await client.ExecuteAsync(request);
                 //context 
@@ -149,7 +150,7 @@ namespace WarOfMinds.WebApi.SignalR
                 {
                     question.questionId = questionId++;
                 }
-                
+
             }
             catch (Exception e)
             {
@@ -164,20 +165,19 @@ namespace WarOfMinds.WebApi.SignalR
         public async Task Execute(GameDTO game)
         {
             try
-            {
-                GameDTO g = await _gameService.GetByIdAsync(game.GameID);
+            {                
                 int timeToAnswer = _TimeToAnswer * 1000; //10 שניות
                 Random rnd = new Random();
                 rnd.Next();
                 foreach (Question item in _groupData[$"game_{game.GameID}"].questions)
                 {
-                    g = await _gameService.GetByIdAsync(game.GameID);
+                    
                     //שולח את השאלה לכל השחקנים
                     await DisplayQuestionAsync(game.GameID, item);
                     //כאן השהיה של כמה שניות לקבלת התשובות
-                    
+
                     await Task.Delay(10000);
-                    
+
                     //שולח את התשובה לכל השחקנים
                     //חישוב הניקוד של השאלה הזו עבור כל השחקנים
                     string winner = SortPlayersByAnswers(game.GameID, item.questionId);
@@ -267,7 +267,7 @@ namespace WarOfMinds.WebApi.SignalR
                 //בודקים מיהו השחקן שלו הניקוד הכי גבוה
                 //שולחים אותו בתור מנצח
                 //שולחים את כל השחקנים מהדאטה בייס+ את הניקודים שלהם+את הקוד של המשחק לחישוב ניקודים ועדכון דאטה בייס
-                
+
                 List<PlayerDTO> players = (await _gameService.GetByIdInNewScopeAsync(gameId)).Players.ToList();
                 List<int> scores = players.Select(p => GetUserConnectionByPlayerID(p).score).ToList();
                 int maxScore = scores.Max();
@@ -280,7 +280,8 @@ namespace WarOfMinds.WebApi.SignalR
 
                 //איכשהו לשלוח לשחקן את הציון המעודכן שלו.
                 //אולי בסיום דרך הקונטרולר
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(e);
             }

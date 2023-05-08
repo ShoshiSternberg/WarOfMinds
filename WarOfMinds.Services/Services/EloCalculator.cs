@@ -63,12 +63,11 @@ namespace WarOfMinds.Services.Services
                 _players.Add(0, p1);
             }
 
-            GameDTO game = await _gameService.GetWholeByIdAsync(gameID);//זה אמור להיות כל השחקנים מהדאטה בייס
-            List<PlayerDTO> playersFromDB = (List<PlayerDTO>)game.Players;
+            GameDTO game = await _gameService.GetByIdInNewScopeAsync(gameID);//זה אמור להיות כל השחקנים מהדאטה בייס
+            List<PlayerDTO> playersFromDB = game.Players.ToList<PlayerDTO>();
             for (int i = 0; i < playersFromDB.Count; i++)
             {
                 _players.Add(playersFromDB[i].PlayerID, new PlayerForCalcRating(playersFromDB[i], scores[i], 0));
-
             }
         }
 
