@@ -33,7 +33,7 @@ namespace WarOfMinds.Services.Services
             _mapper = mapper;
             _scopeFactory = serviceScopeFactory;
             _subjectService = subjectService;
-            
+
         }
 
         public async Task<GameDTO> AddAsync(GameDTO game)
@@ -47,7 +47,7 @@ namespace WarOfMinds.Services.Services
             {
                 game.Subject = await _subjectService.GetByIdAsync(game.SubjectID);
             }
-                      
+
             return _mapper.Map<GameDTO>(await _gameRepository.AddGameAsync(_mapper.Map<Game>(game)));
         }
 
@@ -112,40 +112,37 @@ namespace WarOfMinds.Services.Services
             return false;
         }
 
-
+        //להצטרפות באמצע המשחק
         public async Task<GameDTO> GetActiveGameBySubjectAndRatingAsync(int subjectID, int rating)
         {
-            var games =await GetAllAsync();
+            var games = await GetAllAsync();
             return games
-            .Where(g => g.SubjectID == subjectID && g.IsActive && CheckRating(g.Rating, rating))
+            .Where(g => g.SubjectID == subjectID && g.IsActive &&(! g.OnHold )&& CheckRating(g.Rating, rating))
+            .FirstOrDefault();
+        }
+        //להמתנה
+        public async Task<GameDTO> GetNotActiveGameBySubjectAndRatingAsync(int subjectID, int rating)
+        {
+            var games = await GetAllAsync();
+            return games
+            .Where(g => g.SubjectID == subjectID&&g.IsActive &&g.OnHold&& CheckRating(g.Rating, rating))
             .FirstOrDefault();
         }
 
         //מציאת משחק ועדכונו
-        public async Task<GameDTO> FindGameAsync(SubjectDTO subject, PlayerDTO player)
+        public async Task<GameDTO> FindNotActiveGameAsync(SubjectDTO subject, PlayerDTO player)
         {
             GameDTO game;
             lock (_lock)
             {
-                game = GetActiveGameBySubjectAndRatingAsync(subject.SubjectID, player.ELORating).Result;
+                game = GetNotActiveGameBySubjectAndRatingAsync(subject.SubjectID, player.ELORating).Result;
 
                 if (game == null)
                 {
-                    // Create a new game with the player's rating
-                    game = new GameDTO
-                    {
-                        SubjectID = subject.SubjectID,
-                        Subject = subject,                     
-                        GameDate = DateTime.Now,
-                        GameLength = 30,
-                        IsActive = true,
-                        Rating = player.ELORating,
-                        Players = new List<PlayerDTO>()
-                    };
-                    game = AddGameAsync(game).Result;
+                    return null;
                 }
             }
-            
+
             // Add player to existing game
             game = await GetWholeByIdAsync(game.GameID);
             if (!game.Players.Any(p => p.PlayerID == player.PlayerID))
@@ -177,6 +174,29 @@ namespace WarOfMinds.Services.Services
             if (rating > 2000)
                 return "medium";
             return "hard";
+
+        }
+
+        public async Task<GameDTO> FindActiveGameAsync(SubjectDTO subject, PlayerDTO player)
+        {
+            GameDTO game;
+            lock (_lock)
+            {
+                game = GetActiveGameBySubjectAndRatingAsync(subject.SubjectID, player.ELORating).Result;
+
+                if (game == null)
+                {
+                    return null;
+                }
+            }
+
+            // Add player to existing game
+            game = await GetWholeByIdAsync(game.GameID);
+            if (!game.Players.Any(p => p.PlayerID == player.PlayerID))
+                game.Players.Add(player);
+
+            game = await UpdateGameAsync(game.GameID, game);
+            return await GetWholeByIdAsync(game.GameID);
 
         }
     }

@@ -37,51 +37,87 @@ namespace WarOfMinds.WebApi.SignalR
             _connections = connections;
             _groupData = groupData;
             _hubContext = hubContext;
-
-
-            GameJoined += async (sender, e) =>
-            {
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "the IHubContext is calling for you");
-                GameDTO g = await _gameService.GetByIdAsync(e.GameID);
-                if (_groupData[$"game_{e.GameID}"].questions == null)//זה אומר שזו הפעם הראשונה שבוחרים את הנושא- תחילת המשחק
-                {
-                    await GetQuestionsAsync(e.GameID, e.SubjectID, _gameService.Difficulty(e.Rating));                   
-                    await Execute(e);
-                }
-            };
             _hubContext = hubContext;
             _configuration = configuration.GetSection("TriviaHub");
             _TimeToAnswer = _configuration.GetValue<int>("TimeToAnswer");
+
+            GameStarted += async (sender, e) =>
+            {
+                //await _hubContext.Clients.All.SendAsync("ReceiveMessage", "the IHubContext is calling for you");                
+                if (_groupData[$"game_{e.GameID}"].questions == null)// הפעם הראשונה שבוחרים את הנושא- תחילת המשחק
+                {
+                    await GetQuestionsAsync(e.GameID, e.SubjectID, _gameService.Difficulty(e.Rating));
+                    await Execute(e);
+                }
+            };
+
         }
 
-        //יצירה וטיפול באירוע של הצטרפות למשחק
+        //יצירה וטיפול באירוע של הפעלת למשחק
         public delegate void GameEventHandler(object sender, GameDTO e);
 
-        public event GameEventHandler GameJoined;
+        public event GameEventHandler GameStarted;
 
 
-        protected virtual void OnGameJoined(GameDTO e)
+        protected virtual void OnGameStarted(GameDTO e)
         {
-            GameJoined?.Invoke(this, e);
+            GameStarted?.Invoke(this, e);
         }
 
-        public async Task JoinGameAsync(int playerId, int subjectId)
+
+        // הצטרפות למשחק קיים
+        public async Task JoinExistingGame(int playerId, int subjectId)
         {
             PlayerDTO player = await _playerService.GetByIdAsync(playerId);
             SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
-            GameDTO game = await _gameService.FindGameAsync(subject, player);
+            GameDTO game = await _gameService.FindActiveGameAsync(subject, player);
             if (game == null)
             {
-                return;
+                await Clients.Caller.SendAsync("ReceiveMessage", $"there are not active game in subject {subject.Subjectname} with your rating.");
+
             }
-            if (_connections.Values.Any(p => (p.player == player)&&(p.game==game.GameID)))
+            if (_connections.Values.Any(p => (p.player == player) && (p.game == game.GameID)))
             {
                 //אם הוא מנסה להצטרף לאותו משחק שוב
                 await Clients.Caller.SendAsync("ReceiveMessage", "You may not join the same game twice!");
             }
             else
             {
-                //אם הוא הראשון שמצטרף למשחק
+                _connections.Add(Context.ConnectionId, new UserConnection(player, game.GameID));
+
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{game.GameID}");
+                await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} has joined the game{game.GameID} in subject {subject.Subjectname}.");
+
+                Console.WriteLine($"player {player.PlayerID} joined to game (in process) {game.GameID}");
+            }
+        }
+
+        // פתיחת חדר חדש
+        public async Task CreateNewGame(int playerId, int subjectId)
+        {
+            PlayerDTO player = await _playerService.GetByIdAsync(playerId);
+            SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
+            GameDTO game = new GameDTO();
+            game.Subject = subject;
+            game.SubjectID = subjectId;
+            game.GameDate = DateTime.Now;
+            game.Rating = player.ELORating;
+            game.IsActive = false;
+            game.Players =new List<PlayerDTO>();
+            game.Players.Add(player);
+            game = await _gameService.AddGameAsync(game);
+            if (game == null)
+            {
+                return;
+            }
+            if (_connections.Values.Any(p => (p.player == player) && (p.game == game.GameID)))
+            {
+                //אם הוא מנסה להצטרף לאותו משחק שוב
+                await Clients.Caller.SendAsync("ReceiveMessage", "You may not join the same game twice!");
+            }
+            else
+            {
+                //לא בטוח שצריך את הנעילה
                 lock (_groupData)
                 {
                     if (!_groupData.ContainsKey($"game_{game.GameID}"))
@@ -92,32 +128,75 @@ namespace WarOfMinds.WebApi.SignalR
                 //אם הוא הראשון שהצטרף- המשך הטיפול מחוץ לקטע הקריטי
                 if (_groupData[$"game_{game.GameID}"].game == null)
                 {
-                    game.IsActive = true;
+                    _groupData[$"game_{game.GameID}"].GameManagerConnectionID = Context.ConnectionId;
                     _groupData[$"game_{game.GameID}"].game = game;
                     await _gameService.UpdateGameAsync(game.GameID, _groupData[$"game_{game.GameID}"].game);
                 }
                 //לא צריך לנעול כי בכל מקרה זה מפתחות שונים              
-                    
+
                 _connections.Add(Context.ConnectionId, new UserConnection(player, game.GameID));
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{game.GameID}");
-                await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} has joined the game{game.GameID} in subject {subject.Subjectname}.");
+                await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} open new waiting room to game {game.GameID} in subject {subject.Subjectname}.");
 
-                if (_groupData[$"game_{game.GameID}"].IsActive == false)
+            }
+            Console.WriteLine($"player {player.PlayerID} open new waiting room to game {game.GameID}");
+        }
+        //הצטרפות לחדר המתנה
+        public async Task JoinWaitingRoomAsync(int playerId, int subjectId)
+        {
+            PlayerDTO player = await _playerService.GetByIdAsync(playerId);
+            SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
+            GameDTO game = await _gameService.FindNotActiveGameAsync(subject, player);
+            if (game == null)
+            {
+                await CreateNewGame(playerId, subjectId);//אם לא מצאו חדר בהמתנה פותחים חדר חדש
+            }
+            else
+            {
+                if (_connections.Values.Any(p => (p.player == player) && (p.game == game.GameID)))
                 {
-                    _groupData[$"game_{game.GameID}"].IsActive = true;
-                    OnGameJoined(game);
+                    //אם הוא מנסה להצטרף לאותו משחק שוב
+                    await Clients.Caller.SendAsync("ReceiveMessage", "You may not join the same game twice!");
                 }
-                Console.WriteLine($"player {player.PlayerID} joined to game {game.GameID}");
+                else
+                {
+                    //לא צריך לנעול כי בכל מקרה זה מפתחות שונים              
+
+                    _connections.Add(Context.ConnectionId, new UserConnection(player, game.GameID));
+
+                    await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{game.GameID}");
+                    await Clients.Group($"game_{game.GameID}").SendAsync("ReceiveMessage", "my app", $"player {player.PlayerName} joined to waiting room for game {game.GameID} in subject {subject.Subjectname}.");
+
+
+                    Console.WriteLine($"player {player.PlayerID} joined to waiting room for game {game.GameID}");
+                }
             }
         }
 
-        public override Task OnDisconnectedAsync(Exception? exception)
+        //הפעלת המשחק על ידי מי שפתח את החדר
+        public async Task StartGameByManager()
         {
-            Clients.Group($"game_{_connections[Context.ConnectionId].game}").SendAsync("ReceiveMessage", "my app", $"player {_connections[Context.ConnectionId].player.PlayerName} has left the game{_connections[Context.ConnectionId].game}.");
+            PlayerDTO player = _connections[Context.ConnectionId].player;
+            GameDTO game = _groupData[$"game_{_connections[Context.ConnectionId].game}"].game;
 
-            return base.OnDisconnectedAsync(exception);
+            if (_groupData[$"game_{game.GameID}"].GameManagerConnectionID == Context.ConnectionId)
+            {
+                _groupData[$"game_{game.GameID}"].IsActive = true;
+                game.IsActive = true;
+                await _gameService.UpdateGameAsync(game.GameID, game);
+                OnGameStarted(game);
+            }
+
         }
+
+
+        //public override Task OnDisconnectedAsync(Exception? exception)
+        //{
+        //    Clients.Group($"game_{_connections[Context.ConnectionId].game}").SendAsync("ReceiveMessage", "my app", $"player {_connections[Context.ConnectionId].player.PlayerName} has left the game{_connections[Context.ConnectionId].game}.");
+
+        //    return base.OnDisconnectedAsync(exception);
+        //}
 
 
         //קבלת השאלות מהרשת, המרה לליסט של אובייקטים מסוג שאלה
@@ -165,13 +244,13 @@ namespace WarOfMinds.WebApi.SignalR
         public async Task Execute(GameDTO game)
         {
             try
-            {                
+            {
                 int timeToAnswer = _TimeToAnswer * 1000; //10 שניות
                 Random rnd = new Random();
                 rnd.Next();
                 foreach (Question item in _groupData[$"game_{game.GameID}"].questions)
                 {
-                    
+
                     //שולח את השאלה לכל השחקנים
                     await DisplayQuestionAsync(game.GameID, item);
                     //כאן השהיה של כמה שניות לקבלת התשובות
@@ -282,7 +361,7 @@ namespace WarOfMinds.WebApi.SignalR
                     string winner = players[0].PlayerName;//.FirstOrDefault(p => GetUserConnectionByPlayerID(p).score == maxScore).PlayerName;
                     await DisplayWinnerAndEndGameAsync(gameId, winner);
                 }
-                
+
                 _eloCalculator.UpdateRatingOfAllPlayers(gameId, players, scores);
 
                 //איכשהו לשלוח לשחקן את הציון המעודכן שלו.

@@ -58,8 +58,8 @@ namespace WarOfMinds.Services.Services
                 p.PlayerName = "virtual";
                 p.ELORating = playersSortedByScore[0].ELORating;
                 PlayerForCalcRating p1 = new PlayerForCalcRating(p, 0, 0);//אם הוא נכשל מול עצמו היריב הוירטואלי מקבל את כל הנקודות- מס השאלות כפול מספר השניות לכל שאלה
-                if (scores[0] == 0)
-                    p1.scoreForPlacementPosition = Convert.ToInt32(_TriviaHubConfiguration["NumOfQuestions"]) * Convert.ToInt32(_TriviaHubConfiguration["TimeToAnswer"]);
+                //if (scores[0] == 0)
+                //    p1.scoreForPlacementPosition = Convert.ToInt32(_TriviaHubConfiguration["NumOfQuestions"]) * Convert.ToInt32(_TriviaHubConfiguration["TimeToAnswer"]);
                 _players.Add(0, p1);
             }
 
@@ -72,7 +72,7 @@ namespace WarOfMinds.Services.Services
         }
 
 
-        public async void UpdateRatingOfAllPlayers(int gameID, List<PlayerDTO> playersSortedByScore)
+        public async void UpdateRatingOfAllPlayers(int gameID, List<PlayerDTO> playersSortedByScore, List<int> scores)
         {
             await Init(gameID, playersSortedByScore);
             int NumOfPlayers = _players.Count;

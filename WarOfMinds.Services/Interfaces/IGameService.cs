@@ -15,12 +15,12 @@ namespace WarOfMinds.Services.Interfaces
         Task<GameDTO> UpdateAsync(int id,GameDTO game);
         Task<GameDTO> UpdateGameAsync(int id, GameDTO game);
         Task DeleteByIdAsync(int id);
-        Task<GameDTO> FindGameAsync(SubjectDTO subject, PlayerDTO player);
-        Task<GameDTO> GetActiveGameBySubjectAndRatingAsync(int subjectID, int rating);
+        Task<GameDTO> FindNotActiveGameAsync(SubjectDTO subject, PlayerDTO player);        
         Task<GameDTO> AddGameAsync(GameDTO game);
         Task<GameDTO> GetWholeByIdAsync(int id);    
         Task<GameDTO> GetByIdInNewScopeAsync(int id);    
         string Difficulty(int rating);
+        Task<GameDTO> FindActiveGameAsync(SubjectDTO subject, PlayerDTO player);
     }
         
 }

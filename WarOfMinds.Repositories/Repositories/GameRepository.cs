@@ -71,11 +71,20 @@ namespace WarOfMinds.Repositories.Repositories
                 // attach the subject to the context
                 _context.Subjects.Attach(game.Subject);
             }
-
+            var players = game.Players;
+            game.Players.Clear();
             // add the game to the context
-            var addedGame = await _context.Games.AddAsync(game);
+            Game addedGame =( await _context.Games.AddAsync(game)).Entity;
             await _context.SaveChangesAsync();
-            return addedGame.Entity;
+            _context.ChangeTracker.Clear();
+            foreach (GamePlayer player in players)
+            {
+                player.PGame = addedGame;
+                player.GameId = addedGame.GameID;
+                await _gamePlayerRepository.AddAsync(player);
+            }
+            
+            return addedGame;
         }
         public async Task<Game> UpdateGameAsync(Game game)
         {

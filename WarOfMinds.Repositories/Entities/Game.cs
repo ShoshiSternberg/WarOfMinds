@@ -57,21 +57,21 @@ namespace WarOfMinds.Repositories.Entities
             get { return gameLength; }
             set { gameLength = value; }
         }
-
-        //private Player gameManager;
-
-        //public Player GameManager
-        //{
-        //    get { return gameManager; }
-        //    set { gameManager = value; }
-        //}
-
+        
         private bool isActive;
 
         public bool IsActive
         {
             get { return isActive; }
             set { isActive = value; }
+        }
+
+        private bool onHold;
+
+        public bool OnHold
+        {
+            get { return onHold; }
+            set { onHold = value; }
         }
 
         private int rating;

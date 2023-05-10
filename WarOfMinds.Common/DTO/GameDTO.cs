@@ -57,6 +57,13 @@ namespace WarOfMinds.Common.DTO
             get { return isActive; }
             set { isActive = value; }
         }
+        private bool onHold;
+
+        public bool OnHold
+        {
+            get { return onHold; }
+            set { onHold = value; }
+        }
 
         private int rating;
 
