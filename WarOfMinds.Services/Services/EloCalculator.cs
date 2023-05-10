@@ -49,7 +49,7 @@ namespace WarOfMinds.Services.Services
             _players = players;
         }
 
-        private async Task Init(int gameID, List<PlayerDTO> playersSortedByScore, List<int> scores)
+        private async Task Init(int gameID, List<PlayerDTO> playersSortedByScore)
         {
             if (playersSortedByScore.Count == 1)//אם שחקן משחק לבד, אפשר להניח שיש לו יריב וירטואלי עם דרוג זהה לדרוג הקודם שלו
             {
@@ -67,22 +67,22 @@ namespace WarOfMinds.Services.Services
             List<PlayerDTO> playersFromDB = game.Players.ToList<PlayerDTO>();
             for (int i = 0; i < playersFromDB.Count; i++)
             {
-                _players.Add(playersFromDB[i].PlayerID, new PlayerForCalcRating(playersFromDB[i], scores[i], 0));
+                _players.Add(playersFromDB[i].PlayerID, new PlayerForCalcRating(playersFromDB[i], 0, 0));
             }
         }
 
 
-        public async void UpdateRatingOfAllPlayers(int gameID, List<PlayerDTO> playersSortedByScore, List<int> scores)
+        public async void UpdateRatingOfAllPlayers(int gameID, List<PlayerDTO> playersSortedByScore)
         {
-            await Init(gameID, playersSortedByScore, scores);
+            await Init(gameID, playersSortedByScore);
             int NumOfPlayers = _players.Count;
             if (NumOfPlayers < 2)
             {
                 throw (new Exception("There are no players"));
-
             }
             else
             {
+
                 //שלב א- חישוב ההסתברות
                 double sumOfPlayersProbabilities = (NumOfPlayers * (NumOfPlayers - 1)) / 2;
                 foreach (var player in _players)
@@ -111,22 +111,22 @@ namespace WarOfMinds.Services.Services
                 if (_Base > 1)
                 {
                     exponentialDivider = 0;
-                    foreach (var player in _players)
+                    for (int i = 1; i < playersSortedByScore.Count; i++)
                     {
-                        exponentialDivider += (Math.Pow(_Base, player.Value.scoreForPlacementPosition));
+                        exponentialDivider += (Math.Pow(_Base, (playersSortedByScore.Count - i)) - 1);
                     }
-                    foreach (var player in _players)
+                    for (int i = 1; i < playersSortedByScore.Count; i++)
                     {
-                        double score = ((Math.Pow(_Base, player.Value.scoreForPlacementPosition) - 1)) / exponentialDivider;
-                        player.Value.scoreForPlacementPosition = score;
+                        double score = ((Math.Pow(_Base, (playersSortedByScore.Count - i)) - 1)) / exponentialDivider;
+                        _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition = score;
                     }
                 }
                 else
                 {
-                    foreach (var player in _players)
+                    for (int i = 0; i < playersSortedByScore.Count; i++)
                     {
-                        double score = player.Value.scoreForPlacementPosition / ((NumOfPlayers * player.Value.scoreForPlacementPosition) / 2);
-                        player.Value.scoreForPlacementPosition = score;
+                        double score = (playersSortedByScore.Count - i) / ((playersSortedByScore.Count * (playersSortedByScore.Count - 1)) / 2);
+                        _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition = score;
 
                     }
                 }
@@ -135,20 +135,19 @@ namespace WarOfMinds.Services.Services
                 foreach (var item in _players)
                 {
                     double newEloRating = Math.Round(item.Value.player.ELORating + _k * (NumOfPlayers - 1) * (item.Value.scoreForPlacementPosition - item.Value.probability));
-                    item.Value.player.ELORating = (int)newEloRating;
-                    if (item.Value.player.PlayerID != 0)//כמובן שאת הוירטואלי אין צורך לעדכן
-                        //await _playerService.UpdateAsync(item.Value.player);
-                        Console.WriteLine($"player: {item.Key} old score: {item.Value.player.ELORating} probability: {item.Value.probability} new score: {item.Value.newEloRating}");
+                    item.Value.newEloRating = (int)newEloRating;
+                    Console.WriteLine($"player: {item.Key} old score: {item.Value.player.ELORating} probability: {item.Value.probability} new score: {item.Value.newEloRating}");
+                    await _playerService.UpdateAsync(item.Value.player);
                 }
 
             }
+
         }
-
-
         public double probabilityToWinAgainst(double opponentRating, double currentPlayerRating)
         {
             return 1 / (1 + Math.Pow(10, (opponentRating - currentPlayerRating) / _d));
         }
+
     }
 }
 

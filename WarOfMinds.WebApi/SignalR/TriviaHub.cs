@@ -215,8 +215,6 @@ namespace WarOfMinds.WebApi.SignalR
             await _hubContext.Clients.Group($"game_{gameId}").SendAsync("ReceiveAnswerAndWinner", q.correct_answer, winner);
         }
 
-
-
         public async Task GetAnswerAsync(int qNum, string answer, int time)
         {
             try
@@ -266,16 +264,25 @@ namespace WarOfMinds.WebApi.SignalR
                 //יוצרים רשימה של כל הניקודים שהם צברו
                 //בודקים מיהו השחקן שלו הניקוד הכי גבוה
                 //שולחים אותו בתור מנצח
-                //שולחים את כל השחקנים מהדאטה בייס+ את הניקודים שלהם+את הקוד של המשחק לחישוב ניקודים ועדכון דאטה בייס
-
+                //שולחים את כל השחקנים מהדאטה בייס+ את הניקודים שלהם+את הקוד של המשחק לחישוב ניקודים ועדכון דאטה בייס                
                 List<PlayerDTO> players = (await _gameService.GetByIdInNewScopeAsync(gameId)).Players.ToList();
+                if (players.Count < 2)
+                {
+                    if (GetUserConnectionByPlayerID(players[0]).score > _configuration.GetValue<Int32>("NumOfQuestions") * _configuration.GetValue<Int32>("TimeToAnswer"))
+                    {
+
+                    }
+
+                }
+                players.Sort((p1, p2) => (GetUserConnectionByPlayerID(p1).score).CompareTo(GetUserConnectionByPlayerID(p2).score));
                 List<int> scores = players.Select(p => GetUserConnectionByPlayerID(p).score).ToList();
                 int maxScore = scores.Max();
-                if (maxScore > 0)
+                if (GetUserConnectionByPlayerID(players[0]).score > 0)
                 {
-                    string winner = players.FirstOrDefault(p => GetUserConnectionByPlayerID(p).score == maxScore).PlayerName;
+                    string winner = players[0].PlayerName;//.FirstOrDefault(p => GetUserConnectionByPlayerID(p).score == maxScore).PlayerName;
                     await DisplayWinnerAndEndGameAsync(gameId, winner);
                 }
+                
                 _eloCalculator.UpdateRatingOfAllPlayers(gameId, players, scores);
 
                 //איכשהו לשלוח לשחקן את הציון המעודכן שלו.
