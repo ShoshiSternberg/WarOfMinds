@@ -47,5 +47,14 @@ namespace WarOfMinds.Repositories.Repositories
             await _context.SaveChangesAsync();
             return updatedPlayer.Entity;
         }
+        
+        public async Task<Player> GetByEmailAndPassword(string email,string password)
+        {
+            var InsertedPlayer = _context.Players.FirstOrDefaultAsync(p=>p.PlayerEmail==email &&p.PlayerPassword==password);
+            await _context.SaveChangesAsync();
+            return InsertedPlayer.Result;
+        }
+
+
     }
 }

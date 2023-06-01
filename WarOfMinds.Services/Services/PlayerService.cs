@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using WarOfMinds.Common.DTO;
@@ -46,6 +47,11 @@ namespace WarOfMinds.Services.Services
         public async Task<PlayerDTO> UpdateAsync(PlayerDTO Player)
         {
             return _mapper.Map<PlayerDTO>(await _playerRepository.UpdateAsync(_mapper.Map<Player>(Player)));
+        }
+
+        public async Task<PlayerDTO> GetByEmailAndPassword(string email, string password)
+        {
+            return _mapper.Map<PlayerDTO>(await _playerRepository.GetByEmailAndPassword(email, password));
         }
     }
 }

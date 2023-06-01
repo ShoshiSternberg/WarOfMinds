@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -25,22 +26,19 @@ namespace WarOfMinds.Services.Services
         private readonly IGameRepository _gameRepository;
         private readonly ISubjectService _subjectService;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
         private static readonly object _lock = new object();
-        public GameService(IGameRepository gameRepository, ISubjectService subjectService, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
+        public GameService(IGameRepository gameRepository, ISubjectService subjectService, IMapper mapper, IServiceScopeFactory serviceScopeFactory,IConfiguration configuration)
         {
             _gameRepository = gameRepository;
             _mapper = mapper;
             _scopeFactory = serviceScopeFactory;
             _subjectService = subjectService;
-
+            _configuration = configuration;
         }
 
-        public async Task<GameDTO> AddAsync(GameDTO game)
-        {
-            return _mapper.Map<GameDTO>(await _gameRepository.AddAsync(_mapper.Map<Game>(game)));
-        }
-
+        
         public async Task<GameDTO> AddGameAsync(GameDTO game)
         {
             if (game.Subject == null)
@@ -89,13 +87,7 @@ namespace WarOfMinds.Services.Services
         {
             return _mapper.Map<GameDTO>(await _gameRepository.GetWholeByIdAsync(id));
 
-        }
-
-        public async Task<GameDTO> UpdateAsync(int id, GameDTO game)
-        {
-            game.GameID = id;
-            return _mapper.Map<GameDTO>(await _gameRepository.UpdateAsync(_mapper.Map<Game>(game)));
-        }
+        }       
 
         public async Task<GameDTO> UpdateGameAsync(int id, GameDTO game)
         {
@@ -106,7 +98,7 @@ namespace WarOfMinds.Services.Services
 
         public bool CheckRating(int gameRating, int playerRating)
         {
-            int x = 500;//צריך להחליט מה הטווח שבו מאפשרים לשחקן חדש להצטרף למשחק
+            int x = 100;// _configuration.GetSection("Game").getValue<int>("RatingRange");
             if (gameRating + x > playerRating && gameRating - x < playerRating)
                 return true;
             return false;
@@ -121,7 +113,7 @@ namespace WarOfMinds.Services.Services
             .FirstOrDefault();
         }
         //להמתנה
-        public async Task<GameDTO> GetNotActiveGameBySubjectAndRatingAsync(int subjectID, int rating)
+        public async Task<GameDTO> GetActiveOnHoldGameBySubjectAndRatingAsync(int subjectID, int rating)
         {
             var games = await GetAllAsync();
             return games
@@ -129,13 +121,13 @@ namespace WarOfMinds.Services.Services
             .FirstOrDefault();
         }
 
-        //מציאת משחק ועדכונו
-        public async Task<GameDTO> FindNotActiveGameAsync(SubjectDTO subject, PlayerDTO player)
+        //מציאת משחק פעיל ועדכונו
+        public async Task<GameDTO> FindOnHoldGameAsync(SubjectDTO subject, PlayerDTO player)
         {
             GameDTO game;
             lock (_lock)
             {
-                game = GetNotActiveGameBySubjectAndRatingAsync(subject.SubjectID, player.ELORating).Result;
+                game = GetActiveOnHoldGameBySubjectAndRatingAsync(subject.SubjectID, player.ELORating).Result;
 
                 if (game == null)
                 {
@@ -151,7 +143,7 @@ namespace WarOfMinds.Services.Services
             game = await UpdateGameAsync(game.GameID, game);
             return await GetWholeByIdAsync(game.GameID);
         }
-
+        //עדכון דירוג המשחק
         public async Task UpdateRating(GameDTO game, int newPlayerRating)
         {
             try
@@ -159,24 +151,14 @@ namespace WarOfMinds.Services.Services
                 //ממוצע של דירוגי השחקנים
                 int NumOfPlayers = game.Players.Count;
                 game.Rating = (game.Rating + newPlayerRating) / NumOfPlayers + 1;
-                await UpdateAsync(game.GameID, game);
+                await UpdateGameAsync(game.GameID, game);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
         }
-        //כמובן צריך להחליט מהי הרמה המתאימה לאיזה טווח של דירוג
-        public string Difficulty(int rating)
-        {
-            if (rating < 1000)
-                return "easy";
-            if (rating > 2000)
-                return "medium";
-            return "hard";
-
-        }
-
+       
         public async Task<GameDTO> FindActiveGameAsync(SubjectDTO subject, PlayerDTO player)
         {
             GameDTO game;

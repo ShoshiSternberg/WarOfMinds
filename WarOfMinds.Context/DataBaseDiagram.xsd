@@ -245,51 +245,51 @@ SELECT SubjectID, SubjectName, DifficultyLevel FROM Subjects WHERE (SubjectID = 
       </DataSource>
     </xs:appinfo>
   </xs:annotation>
-  <xs:element name="DataBaseDiagram" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_UserDSName="DataBaseDiagram" msprop:Generator_DataSetName="DataBaseDiagram">
+  <xs:element name="DataBaseDiagram" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_UserDSName="DataBaseDiagram" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="DataBaseDiagram">
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="GamePlayer" msprop:Generator_RowEvHandlerName="GamePlayerRowChangeEventHandler" msprop:Generator_RowDeletedName="GamePlayerRowDeleted" msprop:Generator_RowDeletingName="GamePlayerRowDeleting" msprop:Generator_RowEvArgName="GamePlayerRowChangeEvent" msprop:Generator_TablePropName="GamePlayer" msprop:Generator_RowChangedName="GamePlayerRowChanged" msprop:Generator_RowChangingName="GamePlayerRowChanging" msprop:Generator_TableClassName="GamePlayerDataTable" msprop:Generator_RowClassName="GamePlayerRow" msprop:Generator_TableVarName="tableGamePlayer" msprop:Generator_UserTableName="GamePlayer">
+        <xs:element name="GamePlayer" msprop:Generator_RowClassName="GamePlayerRow" msprop:Generator_RowEvHandlerName="GamePlayerRowChangeEventHandler" msprop:Generator_RowDeletedName="GamePlayerRowDeleted" msprop:Generator_RowDeletingName="GamePlayerRowDeleting" msprop:Generator_RowEvArgName="GamePlayerRowChangeEvent" msprop:Generator_TablePropName="GamePlayer" msprop:Generator_RowChangedName="GamePlayerRowChanged" msprop:Generator_UserTableName="GamePlayer" msprop:Generator_RowChangingName="GamePlayerRowChanging" msprop:Generator_TableClassName="GamePlayerDataTable" msprop:Generator_TableVarName="tableGamePlayer">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="PlayerId" msprop:Generator_ColumnPropNameInRow="PlayerId" msprop:Generator_ColumnPropNameInTable="PlayerIdColumn" msprop:Generator_ColumnVarNameInTable="columnPlayerId" msprop:Generator_UserColumnName="PlayerId" type="xs:int" />
-              <xs:element name="GameId" msprop:Generator_ColumnPropNameInRow="GameId" msprop:Generator_ColumnPropNameInTable="GameIdColumn" msprop:Generator_ColumnVarNameInTable="columnGameId" msprop:Generator_UserColumnName="GameId" type="xs:int" />
+              <xs:element name="PlayerId" msprop:Generator_UserColumnName="PlayerId" msprop:Generator_ColumnPropNameInTable="PlayerIdColumn" msprop:Generator_ColumnPropNameInRow="PlayerId" msprop:Generator_ColumnVarNameInTable="columnPlayerId" type="xs:int" />
+              <xs:element name="GameId" msprop:Generator_UserColumnName="GameId" msprop:Generator_ColumnPropNameInTable="GameIdColumn" msprop:Generator_ColumnPropNameInRow="GameId" msprop:Generator_ColumnVarNameInTable="columnGameId" type="xs:int" />
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="Games" msprop:Generator_RowEvHandlerName="GamesRowChangeEventHandler" msprop:Generator_RowDeletedName="GamesRowDeleted" msprop:Generator_RowDeletingName="GamesRowDeleting" msprop:Generator_RowEvArgName="GamesRowChangeEvent" msprop:Generator_TablePropName="Games" msprop:Generator_RowChangedName="GamesRowChanged" msprop:Generator_RowChangingName="GamesRowChanging" msprop:Generator_TableClassName="GamesDataTable" msprop:Generator_RowClassName="GamesRow" msprop:Generator_TableVarName="tableGames" msprop:Generator_UserTableName="Games">
+        <xs:element name="Games" msprop:Generator_RowClassName="GamesRow" msprop:Generator_RowEvHandlerName="GamesRowChangeEventHandler" msprop:Generator_RowDeletedName="GamesRowDeleted" msprop:Generator_RowDeletingName="GamesRowDeleting" msprop:Generator_RowEvArgName="GamesRowChangeEvent" msprop:Generator_TablePropName="Games" msprop:Generator_RowChangedName="GamesRowChanged" msprop:Generator_UserTableName="Games" msprop:Generator_RowChangingName="GamesRowChanging" msprop:Generator_TableClassName="GamesDataTable" msprop:Generator_TableVarName="tableGames">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="GameID" msdata:ReadOnly="true" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_ColumnPropNameInRow="GameID" msprop:Generator_ColumnPropNameInTable="GameIDColumn" msprop:Generator_ColumnVarNameInTable="columnGameID" msprop:Generator_UserColumnName="GameID" type="xs:int" />
-              <xs:element name="SubjectID" msprop:Generator_ColumnPropNameInRow="SubjectID" msprop:Generator_ColumnPropNameInTable="SubjectIDColumn" msprop:Generator_ColumnVarNameInTable="columnSubjectID" msprop:Generator_UserColumnName="SubjectID" type="xs:int" minOccurs="0" />
-              <xs:element name="GameDate" msprop:Generator_ColumnPropNameInRow="GameDate" msprop:Generator_ColumnPropNameInTable="GameDateColumn" msprop:Generator_ColumnVarNameInTable="columnGameDate" msprop:Generator_UserColumnName="GameDate" type="xs:dateTime" />
-              <xs:element name="GameLength" msprop:Generator_ColumnPropNameInRow="GameLength" msprop:Generator_ColumnPropNameInTable="GameLengthColumn" msprop:Generator_ColumnVarNameInTable="columnGameLength" msprop:Generator_UserColumnName="GameLength" type="xs:int" />
-              <xs:element name="IsActive" msprop:Generator_ColumnPropNameInRow="IsActive" msprop:Generator_ColumnPropNameInTable="IsActiveColumn" msprop:Generator_ColumnVarNameInTable="columnIsActive" msprop:Generator_UserColumnName="IsActive" type="xs:boolean" />
-              <xs:element name="Rating" msprop:Generator_ColumnPropNameInRow="Rating" msprop:Generator_ColumnPropNameInTable="RatingColumn" msprop:Generator_ColumnVarNameInTable="columnRating" msprop:Generator_UserColumnName="Rating" type="xs:int" />
-              <xs:element name="OnHold" msprop:Generator_ColumnPropNameInRow="OnHold" msprop:Generator_ColumnPropNameInTable="OnHoldColumn" msprop:Generator_ColumnVarNameInTable="columnOnHold" msprop:Generator_UserColumnName="OnHold" type="xs:boolean" />
+              <xs:element name="GameID" msdata:ReadOnly="true" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_UserColumnName="GameID" msprop:Generator_ColumnPropNameInTable="GameIDColumn" msprop:Generator_ColumnPropNameInRow="GameID" msprop:Generator_ColumnVarNameInTable="columnGameID" type="xs:int" />
+              <xs:element name="SubjectID" msprop:Generator_UserColumnName="SubjectID" msprop:Generator_ColumnPropNameInTable="SubjectIDColumn" msprop:Generator_ColumnPropNameInRow="SubjectID" msprop:Generator_ColumnVarNameInTable="columnSubjectID" type="xs:int" minOccurs="0" />
+              <xs:element name="GameDate" msprop:Generator_UserColumnName="GameDate" msprop:Generator_ColumnPropNameInTable="GameDateColumn" msprop:Generator_ColumnPropNameInRow="GameDate" msprop:Generator_ColumnVarNameInTable="columnGameDate" type="xs:dateTime" />
+              <xs:element name="GameLength" msprop:Generator_UserColumnName="GameLength" msprop:Generator_ColumnPropNameInTable="GameLengthColumn" msprop:Generator_ColumnPropNameInRow="GameLength" msprop:Generator_ColumnVarNameInTable="columnGameLength" type="xs:int" />
+              <xs:element name="IsActive" msprop:Generator_UserColumnName="IsActive" msprop:Generator_ColumnPropNameInTable="IsActiveColumn" msprop:Generator_ColumnPropNameInRow="IsActive" msprop:Generator_ColumnVarNameInTable="columnIsActive" type="xs:boolean" />
+              <xs:element name="Rating" msprop:Generator_UserColumnName="Rating" msprop:Generator_ColumnPropNameInTable="RatingColumn" msprop:Generator_ColumnPropNameInRow="Rating" msprop:Generator_ColumnVarNameInTable="columnRating" type="xs:int" />
+              <xs:element name="OnHold" msprop:Generator_UserColumnName="OnHold" msprop:Generator_ColumnPropNameInTable="OnHoldColumn" msprop:Generator_ColumnPropNameInRow="OnHold" msprop:Generator_ColumnVarNameInTable="columnOnHold" type="xs:boolean" />
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="Players" msprop:Generator_RowEvHandlerName="PlayersRowChangeEventHandler" msprop:Generator_RowDeletedName="PlayersRowDeleted" msprop:Generator_RowDeletingName="PlayersRowDeleting" msprop:Generator_RowEvArgName="PlayersRowChangeEvent" msprop:Generator_TablePropName="Players" msprop:Generator_RowChangedName="PlayersRowChanged" msprop:Generator_RowChangingName="PlayersRowChanging" msprop:Generator_TableClassName="PlayersDataTable" msprop:Generator_RowClassName="PlayersRow" msprop:Generator_TableVarName="tablePlayers" msprop:Generator_UserTableName="Players">
+        <xs:element name="Players" msprop:Generator_RowClassName="PlayersRow" msprop:Generator_RowEvHandlerName="PlayersRowChangeEventHandler" msprop:Generator_RowDeletedName="PlayersRowDeleted" msprop:Generator_RowDeletingName="PlayersRowDeleting" msprop:Generator_RowEvArgName="PlayersRowChangeEvent" msprop:Generator_TablePropName="Players" msprop:Generator_RowChangedName="PlayersRowChanged" msprop:Generator_UserTableName="Players" msprop:Generator_RowChangingName="PlayersRowChanging" msprop:Generator_TableClassName="PlayersDataTable" msprop:Generator_TableVarName="tablePlayers">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="PlayerID" msdata:ReadOnly="true" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_ColumnPropNameInRow="PlayerID" msprop:Generator_ColumnPropNameInTable="PlayerIDColumn" msprop:Generator_ColumnVarNameInTable="columnPlayerID" msprop:Generator_UserColumnName="PlayerID" type="xs:int" />
-              <xs:element name="PlayerName" msprop:Generator_ColumnPropNameInRow="PlayerName" msprop:Generator_ColumnPropNameInTable="PlayerNameColumn" msprop:Generator_ColumnVarNameInTable="columnPlayerName" msprop:Generator_UserColumnName="PlayerName">
+              <xs:element name="PlayerID" msdata:ReadOnly="true" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_UserColumnName="PlayerID" msprop:Generator_ColumnPropNameInTable="PlayerIDColumn" msprop:Generator_ColumnPropNameInRow="PlayerID" msprop:Generator_ColumnVarNameInTable="columnPlayerID" type="xs:int" />
+              <xs:element name="PlayerName" msprop:Generator_UserColumnName="PlayerName" msprop:Generator_ColumnPropNameInTable="PlayerNameColumn" msprop:Generator_ColumnPropNameInRow="PlayerName" msprop:Generator_ColumnVarNameInTable="columnPlayerName">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:maxLength value="2147483647" />
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element name="PlayerPassword" msprop:Generator_ColumnPropNameInRow="PlayerPassword" msprop:Generator_ColumnPropNameInTable="PlayerPasswordColumn" msprop:Generator_ColumnVarNameInTable="columnPlayerPassword" msprop:Generator_UserColumnName="PlayerPassword">
+              <xs:element name="PlayerPassword" msprop:Generator_UserColumnName="PlayerPassword" msprop:Generator_ColumnPropNameInTable="PlayerPasswordColumn" msprop:Generator_ColumnPropNameInRow="PlayerPassword" msprop:Generator_ColumnVarNameInTable="columnPlayerPassword">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:maxLength value="2147483647" />
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element name="DateOfRegistration" msprop:Generator_ColumnPropNameInRow="DateOfRegistration" msprop:Generator_ColumnPropNameInTable="DateOfRegistrationColumn" msprop:Generator_ColumnVarNameInTable="columnDateOfRegistration" msprop:Generator_UserColumnName="DateOfRegistration" type="xs:dateTime" />
-              <xs:element name="ELORating" msprop:Generator_ColumnPropNameInRow="ELORating" msprop:Generator_ColumnPropNameInTable="ELORatingColumn" msprop:Generator_ColumnVarNameInTable="columnELORating" msprop:Generator_UserColumnName="ELORating" type="xs:int" />
-              <xs:element name="PlayerEmail" msprop:Generator_ColumnPropNameInRow="PlayerEmail" msprop:Generator_ColumnPropNameInTable="PlayerEmailColumn" msprop:Generator_ColumnVarNameInTable="columnPlayerEmail" msprop:Generator_UserColumnName="PlayerEmail">
+              <xs:element name="DateOfRegistration" msprop:Generator_UserColumnName="DateOfRegistration" msprop:Generator_ColumnPropNameInTable="DateOfRegistrationColumn" msprop:Generator_ColumnPropNameInRow="DateOfRegistration" msprop:Generator_ColumnVarNameInTable="columnDateOfRegistration" type="xs:dateTime" />
+              <xs:element name="ELORating" msprop:Generator_UserColumnName="ELORating" msprop:Generator_ColumnPropNameInTable="ELORatingColumn" msprop:Generator_ColumnPropNameInRow="ELORating" msprop:Generator_ColumnVarNameInTable="columnELORating" type="xs:int" />
+              <xs:element name="PlayerEmail" msprop:Generator_UserColumnName="PlayerEmail" msprop:Generator_ColumnPropNameInTable="PlayerEmailColumn" msprop:Generator_ColumnPropNameInRow="PlayerEmail" msprop:Generator_ColumnVarNameInTable="columnPlayerEmail">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:maxLength value="2147483647" />
@@ -299,18 +299,18 @@ SELECT SubjectID, SubjectName, DifficultyLevel FROM Subjects WHERE (SubjectID = 
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="Subjects" msprop:Generator_RowEvHandlerName="SubjectsRowChangeEventHandler" msprop:Generator_RowDeletedName="SubjectsRowDeleted" msprop:Generator_RowDeletingName="SubjectsRowDeleting" msprop:Generator_RowEvArgName="SubjectsRowChangeEvent" msprop:Generator_TablePropName="Subjects" msprop:Generator_RowChangedName="SubjectsRowChanged" msprop:Generator_RowChangingName="SubjectsRowChanging" msprop:Generator_TableClassName="SubjectsDataTable" msprop:Generator_RowClassName="SubjectsRow" msprop:Generator_TableVarName="tableSubjects" msprop:Generator_UserTableName="Subjects">
+        <xs:element name="Subjects" msprop:Generator_RowClassName="SubjectsRow" msprop:Generator_RowEvHandlerName="SubjectsRowChangeEventHandler" msprop:Generator_RowDeletedName="SubjectsRowDeleted" msprop:Generator_RowDeletingName="SubjectsRowDeleting" msprop:Generator_RowEvArgName="SubjectsRowChangeEvent" msprop:Generator_TablePropName="Subjects" msprop:Generator_RowChangedName="SubjectsRowChanged" msprop:Generator_UserTableName="Subjects" msprop:Generator_RowChangingName="SubjectsRowChanging" msprop:Generator_TableClassName="SubjectsDataTable" msprop:Generator_TableVarName="tableSubjects">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="SubjectID" msdata:ReadOnly="true" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_ColumnPropNameInRow="SubjectID" msprop:Generator_ColumnPropNameInTable="SubjectIDColumn" msprop:Generator_ColumnVarNameInTable="columnSubjectID" msprop:Generator_UserColumnName="SubjectID" type="xs:int" />
-              <xs:element name="SubjectName" msprop:Generator_ColumnPropNameInRow="SubjectName" msprop:Generator_ColumnPropNameInTable="SubjectNameColumn" msprop:Generator_ColumnVarNameInTable="columnSubjectName" msprop:Generator_UserColumnName="SubjectName">
+              <xs:element name="SubjectID" msdata:ReadOnly="true" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_UserColumnName="SubjectID" msprop:Generator_ColumnPropNameInTable="SubjectIDColumn" msprop:Generator_ColumnPropNameInRow="SubjectID" msprop:Generator_ColumnVarNameInTable="columnSubjectID" type="xs:int" />
+              <xs:element name="SubjectName" msprop:Generator_UserColumnName="SubjectName" msprop:Generator_ColumnPropNameInTable="SubjectNameColumn" msprop:Generator_ColumnPropNameInRow="SubjectName" msprop:Generator_ColumnVarNameInTable="columnSubjectName">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:maxLength value="2147483647" />
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element name="DifficultyLevel" msprop:Generator_ColumnPropNameInRow="DifficultyLevel" msprop:Generator_ColumnPropNameInTable="DifficultyLevelColumn" msprop:Generator_ColumnVarNameInTable="columnDifficultyLevel" msprop:Generator_UserColumnName="DifficultyLevel" type="xs:int" />
+              <xs:element name="DifficultyLevel" msprop:Generator_UserColumnName="DifficultyLevel" msprop:Generator_ColumnPropNameInTable="DifficultyLevelColumn" msprop:Generator_ColumnPropNameInRow="DifficultyLevel" msprop:Generator_ColumnVarNameInTable="columnDifficultyLevel" type="xs:int" />
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -336,9 +336,9 @@ SELECT SubjectID, SubjectName, DifficultyLevel FROM Subjects WHERE (SubjectID = 
   </xs:element>
   <xs:annotation>
     <xs:appinfo>
-      <msdata:Relationship name="FK_GamePlayer_Games_GameId" msdata:parent="Games" msdata:child="GamePlayer" msdata:parentkey="GameID" msdata:childkey="GameId" msprop:Generator_UserParentTable="Games" msprop:Generator_UserChildTable="GamePlayer" msprop:Generator_RelationVarName="relationFK_GamePlayer_Games_GameId" msprop:Generator_UserRelationName="FK_GamePlayer_Games_GameId" msprop:Generator_ChildPropName="GetGamePlayerRows" msprop:Generator_ParentPropName="GamesRow" />
-      <msdata:Relationship name="FK_GamePlayer_Players_PlayerId" msdata:parent="Players" msdata:child="GamePlayer" msdata:parentkey="PlayerID" msdata:childkey="PlayerId" msprop:Generator_UserParentTable="Players" msprop:Generator_UserChildTable="GamePlayer" msprop:Generator_RelationVarName="relationFK_GamePlayer_Players_PlayerId" msprop:Generator_UserRelationName="FK_GamePlayer_Players_PlayerId" msprop:Generator_ChildPropName="GetGamePlayerRows" msprop:Generator_ParentPropName="PlayersRow" />
-      <msdata:Relationship name="FK_Games_Subjects_SubjectID" msdata:parent="Subjects" msdata:child="Games" msdata:parentkey="SubjectID" msdata:childkey="SubjectID" msprop:Generator_UserParentTable="Subjects" msprop:Generator_UserChildTable="Games" msprop:Generator_RelationVarName="relationFK_Games_Subjects_SubjectID" msprop:Generator_UserRelationName="FK_Games_Subjects_SubjectID" msprop:Generator_ChildPropName="GetGamesRows" msprop:Generator_ParentPropName="SubjectsRow" />
+      <msdata:Relationship name="FK_GamePlayer_Games_GameId" msdata:parent="Games" msdata:child="GamePlayer" msdata:parentkey="GameID" msdata:childkey="GameId" msprop:Generator_UserParentTable="Games" msprop:Generator_UserChildTable="GamePlayer" msprop:Generator_RelationVarName="relationFK_GamePlayer_Games_GameId" msprop:Generator_ChildPropName="GetGamePlayerRows" msprop:Generator_ParentPropName="GamesRow" msprop:Generator_UserRelationName="FK_GamePlayer_Games_GameId" />
+      <msdata:Relationship name="FK_GamePlayer_Players_PlayerId" msdata:parent="Players" msdata:child="GamePlayer" msdata:parentkey="PlayerID" msdata:childkey="PlayerId" msprop:Generator_UserParentTable="Players" msprop:Generator_UserChildTable="GamePlayer" msprop:Generator_RelationVarName="relationFK_GamePlayer_Players_PlayerId" msprop:Generator_ChildPropName="GetGamePlayerRows" msprop:Generator_ParentPropName="PlayersRow" msprop:Generator_UserRelationName="FK_GamePlayer_Players_PlayerId" />
+      <msdata:Relationship name="FK_Games_Subjects_SubjectID" msdata:parent="Subjects" msdata:child="Games" msdata:parentkey="SubjectID" msdata:childkey="SubjectID" msprop:Generator_UserParentTable="Subjects" msprop:Generator_UserChildTable="Games" msprop:Generator_RelationVarName="relationFK_Games_Subjects_SubjectID" msprop:Generator_ChildPropName="GetGamesRows" msprop:Generator_ParentPropName="SubjectsRow" msprop:Generator_UserRelationName="FK_Games_Subjects_SubjectID" />
     </xs:appinfo>
   </xs:annotation>
 </xs:schema>

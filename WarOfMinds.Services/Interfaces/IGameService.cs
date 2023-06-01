@@ -10,16 +10,13 @@ namespace WarOfMinds.Services.Interfaces
     public interface IGameService
     {
         Task<List<GameDTO>> GetAllAsync();
-        Task<GameDTO> GetByIdAsync(int id);
-        Task<GameDTO> AddAsync(GameDTO game);
-        Task<GameDTO> UpdateAsync(int id,GameDTO game);
+        Task<GameDTO> GetByIdAsync(int id);       
         Task<GameDTO> UpdateGameAsync(int id, GameDTO game);
         Task DeleteByIdAsync(int id);
-        Task<GameDTO> FindNotActiveGameAsync(SubjectDTO subject, PlayerDTO player);        
+        Task<GameDTO> FindOnHoldGameAsync(SubjectDTO subject, PlayerDTO player);        
         Task<GameDTO> AddGameAsync(GameDTO game);
         Task<GameDTO> GetWholeByIdAsync(int id);    
-        Task<GameDTO> GetByIdInNewScopeAsync(int id);    
-        string Difficulty(int rating);
+        Task<GameDTO> GetByIdInNewScopeAsync(int id);            
         Task<GameDTO> FindActiveGameAsync(SubjectDTO subject, PlayerDTO player);
     }
         

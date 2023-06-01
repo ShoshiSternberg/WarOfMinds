@@ -29,6 +29,13 @@ namespace WarOfMinds.WebApi.Controllers
         {
             return _playerService.GetByIdAsync(id);
         }
+        
+        // GET api/<PlayerController>/{email}/{password}
+        [HttpGet("{email}/{password}")]
+        public Task<PlayerDTO> Get(string email,string password)
+        {
+            return _playerService.GetByEmailAndPassword(email,password);
+        }
 
         // POST api/<PlayerController>
         [HttpPost]

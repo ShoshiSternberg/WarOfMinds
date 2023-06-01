@@ -104,7 +104,7 @@ namespace WarOfMinds.Repositories.Repositories
                 }
                 else
                 {
-                    return await AddAsync(game);
+                    return await AddGameAsync(game);
                 }
             }
             catch (Exception ex)
