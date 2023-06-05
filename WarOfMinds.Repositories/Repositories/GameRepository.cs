@@ -61,12 +61,20 @@ namespace WarOfMinds.Repositories.Repositories
                 _context.Subjects.Attach(game.Subject);
             }
             var players = game.Players;
+            List<GamePlayer> list = new List<GamePlayer>();
+            foreach(GamePlayer p in players)
+            {
+                GamePlayer player = new GamePlayer();
+                player.GPlayer=p.GPlayer;
+                player.PlayerId= p.PlayerId;
+                list.Add(p);
+            }
             game.Players.Clear();
             // add the game to the context
             Game addedGame = (await _context.Games.AddAsync(game)).Entity;
             await _context.SaveChangesAsync();
             _context.ChangeTracker.Clear();
-            foreach (GamePlayer player in players)
+            foreach (GamePlayer player in list)
             {
                 player.PGame = addedGame;
                 player.GameId = addedGame.GameID;
