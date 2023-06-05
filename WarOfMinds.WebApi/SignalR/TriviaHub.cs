@@ -198,6 +198,20 @@ namespace WarOfMinds.WebApi.SignalR
 
         }
 
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            if (_connections.TryGetValue(Context.ConnectionId, out UserConnection userConnection))
+            {
+                _connections.Remove(Context.ConnectionId);
+                Clients.Group($"game_{ userConnection.game}").SendAsync("ReceiveMessage","my app", $"{userConnection.player.PlayerID} has left");
+                //List<PlayerDTO> members = _connections.Values.ToList().Where(e => e.game == userConnection.game && !(e.player.PlayerID ==userConnection.player.PlayerID)).Select(e => e.player).ToList();
+                //Clients.Group($"game_{userConnection.game}").SendAsync("JoinWaitingRoom", members);
+            }
+
+            return base.OnDisconnectedAsync(exception);
+        }
+
+        
 
         //public override Task OnDisconnectedAsync(Exception? exception)
         //{
