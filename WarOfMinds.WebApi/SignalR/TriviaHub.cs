@@ -45,8 +45,8 @@ namespace WarOfMinds.WebApi.SignalR
             {
 
                 if (_groupData[$"game_{e.GameID}"].questions == null)
-                {
-                    await GetQuestionsAsync(e.GameID, e.SubjectID, "hard");
+                {//e.SubjectID, the right difficulty
+                    await GetQuestionsAsync(e.GameID,21 , "hard");
                     await ExecuteAsync(e);
                 }
             };
@@ -202,7 +202,7 @@ namespace WarOfMinds.WebApi.SignalR
         {
             if (_connections.TryGetValue(Context.ConnectionId, out UserConnection userConnection))
             {
-                _connections.Remove(Context.ConnectionId);
+               _connections.Remove(Context.ConnectionId);
                 Clients.Group($"game_{ userConnection.game}").SendAsync("ReceiveMessage","my app", $"{userConnection.player.PlayerID} has left");
                 //List<PlayerDTO> members = _connections.Values.ToList().Where(e => e.game == userConnection.game && !(e.player.PlayerID ==userConnection.player.PlayerID)).Select(e => e.player).ToList();
                 //Clients.Group($"game_{userConnection.game}").SendAsync("JoinWaitingRoom", members);
@@ -211,14 +211,6 @@ namespace WarOfMinds.WebApi.SignalR
             return base.OnDisconnectedAsync(exception);
         }
 
-        
-
-        //public override Task OnDisconnectedAsync(Exception? exception)
-        //{
-        //    Clients.Group($"game_{_connections[Context.ConnectionId].game}").SendAsync("ReceiveMessage", "my app", $"player {_connections[Context.ConnectionId].player.PlayerName} has left the game{_connections[Context.ConnectionId].game}.");
-
-        //    return base.OnDisconnectedAsync(exception);
-        //}
 
 
         //קבלת השאלות מהרשת, המרה לליסט של אובייקטים מסוג שאלה
@@ -271,11 +263,10 @@ namespace WarOfMinds.WebApi.SignalR
                 rnd.Next();
                 foreach (Question item in _groupData[$"game_{game.GameID}"].questions)
                 {
-
+                    
                     //שולח את השאלה לכל השחקנים
                     await DisplayQuestionAsync(game.GameID, item);
                     //כאן השהיה של כמה שניות לקבלת התשובות
-
                     await Task.Delay(timeToAnswer);
 
                     //שולח את התשובה לכל השחקנים
@@ -301,11 +292,21 @@ namespace WarOfMinds.WebApi.SignalR
                 //ברשימה הזו יש רק את מי שענה נכון על השאלה. צריך למיין את הרשימה לפי זמן מענה, לראות מי המנצח ולעדכן לכל השחקנים את כל הניקודים.
                 List<AnswerResult> answers = _groupData[$"game_{gameId}"].gameResults;
                 answers.Sort();//מיון התשובות לפי נכונות וזמן             
-
+                //ניקוי לתשובות של השאלה הבאה
+                if (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults == null)
+                {
+                    _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults.Clear();
+                }
                 return answers[0].player.PlayerName;//שליפת השם של השחקן המנצח
 
             }
-            return "No one answered this question correctly :(";
+            //ניקוי לתשובות של השאלה הבאה
+            if (_groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults == null)
+            {
+                _groupData[$"game_{_connections[Context.ConnectionId].game}"].gameResults.Clear();
+            }
+            return "no one";
+
         }
 
         public async Task ReceiveAnswerAndWinner(int gameId, string winner, Question q)
@@ -345,8 +346,10 @@ namespace WarOfMinds.WebApi.SignalR
                     }
                 }
                 //שולחים לו מייד אם ענה נכון או לא
-                await Clients.Caller.SendAsync("ReceiveAnswerAndWinner",
-                    $" Your answer has been captured in the system [{q.correct_answer == answer}], the correct answer is:{_groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum].correct_answer}");
+                //await Clients.Caller.SendAsync("ReceiveAnswerAndWinner",
+                //    $" Your answer has been captured in the system [{q.correct_answer == answer}], the correct answer is:{_groupData[$"game_{_connections[Context.ConnectionId].game}"].questions[qNum].correct_answer}");
+                await Clients.Group($"game_{_connections[Context.ConnectionId].game}").SendAsync("PlayerAnswered", _connections[Context.ConnectionId].player.PlayerName);
+
             }
             catch (Exception e)
             {
@@ -386,9 +389,12 @@ namespace WarOfMinds.WebApi.SignalR
                 }
 
                 _eloCalculator.UpdateRatingOfAllPlayers(gameId, players, scores);
-
+                //עדכון מצב המשחק ללא פעיל
+                _groupData[$"game_{gameId}"].game.IsActive = false;
+                await _gameService.UpdateGameAsync(gameId, _groupData[$"game_{gameId}"].game);
                 //איכשהו לשלוח לשחקן את הציון המעודכן שלו.
                 //אולי בסיום דרך הקונטרולר
+                
             }
             catch (Exception e)
             {
