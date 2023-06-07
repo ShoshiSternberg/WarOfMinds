@@ -82,6 +82,24 @@ namespace WarOfMinds.Services.Services
                 return null;
             }
 
+        }  
+        
+        public async Task<GameDTO> UpdateGameInNewScopeAsync(GameDTO game)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
+                    return _mapper.Map<GameDTO>(await gameRepository.UpdateGameAsync(_mapper.Map<Game>(game)));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
+
         }
         public async Task<GameDTO> GetWholeByIdAsync(int id)
         {

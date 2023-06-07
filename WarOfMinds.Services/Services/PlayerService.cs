@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,17 +11,20 @@ using WarOfMinds.Repositories.Entities;
 using WarOfMinds.Repositories.Interfaces;
 using WarOfMinds.Services.Interfaces;
 
+
 namespace WarOfMinds.Services.Services
 {
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepository _playerRepository;
         private readonly IMapper _mapper;
+        private readonly IServiceScopeFactory _scopeFactory;        
 
-        public PlayerService(IPlayerRepository playerRepository, IMapper mapper)
+        public PlayerService(IPlayerRepository playerRepository, IMapper mapper,IServiceScopeFactory serviceScopeFactory)
         {
             _playerRepository = playerRepository;
             _mapper = mapper;   
+            _scopeFactory = serviceScopeFactory;
         }
 
         public async Task<PlayerDTO> AddAsync(PlayerDTO Player)
@@ -49,6 +53,23 @@ namespace WarOfMinds.Services.Services
             return _mapper.Map<PlayerDTO>(await _playerRepository.UpdateAsync(_mapper.Map<Player>(Player)));
         }
 
+        public async Task<PlayerDTO> UpdatePlayerInNewScopeAsync(PlayerDTO player)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var playerRepository = scope.ServiceProvider.GetRequiredService<IPlayerRepository>();
+                    return _mapper.Map<PlayerDTO>(await playerRepository.UpdateAsync(_mapper.Map<Player>(player)));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
+
+        }
         public async Task<PlayerDTO> GetByEmailAndPassword(string email, string password)
         {
             return _mapper.Map<PlayerDTO>(await _playerRepository.GetByEmailAndPassword(email, password));

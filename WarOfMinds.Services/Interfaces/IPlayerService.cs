@@ -14,6 +14,7 @@ namespace WarOfMinds.Services.Interfaces
         Task<PlayerDTO> GetByIdAsync(int id);
         Task<PlayerDTO> AddAsync(PlayerDTO player);
         Task<PlayerDTO> UpdateAsync(PlayerDTO player);
+        Task<PlayerDTO> UpdatePlayerInNewScopeAsync(PlayerDTO player);
         Task<PlayerDTO> GetByEmailAndPassword(string Email, string password);
         Task DeleteByIdAsync(int id);
     }
