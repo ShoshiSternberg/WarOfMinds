@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RestSharp;
+using System.Text.Json;
 using WarOfMinds.Common.DTO;
 using WarOfMinds.Services.Interfaces;
+using WarOfMinds.Services.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,13 +16,30 @@ namespace WarOfMinds.WebApi.Controllers
         private readonly ISubjectService _subjectService;
         public SubjectController(ISubjectService subjectService)
         {
-            _subjectService= subjectService;
+            _subjectService = subjectService;
         }
         // GET: api/<SubjectController>
         [HttpGet]
-        public Task<List<SubjectDTO>> Get()
+        public async Task<List<SubjectDTO>> Get()
         {
-            return _subjectService.GetAllAsync();
+            if (DateTime.Now.Day == 13)
+            {
+                var client = new RestClient("https://opentdb.com/api_category.php");
+                var request = new RestRequest("", Method.Get);
+                RestResponse response = await client.ExecuteAsync(request);
+
+                string jsonString = response.Content;
+                //המרה מג'יסון לאובייקט שאלה
+                SubjectsRoot subjects =
+                    JsonSerializer.Deserialize<SubjectsRoot>(jsonString);
+                foreach (subjectAPI subject in subjects.trivia_categories)
+                {
+                    SubjectDTO subjectDTO = new SubjectDTO { SubjectID = subject.id, Subjectname = subject.name };
+                    await _subjectService.AddAsync(subjectDTO);
+                }
+
+            }
+            return await _subjectService.GetAllAsync();
         }
 
         // GET api/<SubjectController>/5

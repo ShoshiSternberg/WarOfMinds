@@ -50,11 +50,32 @@ namespace WarOfMinds.Repositories.Repositories
         
         public async Task<Player> GetByEmailAndPassword(string email,string password)
         {
-            var InsertedPlayer = _context.Players.FirstOrDefaultAsync(p=>p.PlayerEmail==email &&p.PlayerPassword==password);
-            await _context.SaveChangesAsync();
-            return InsertedPlayer.Result;
+            try
+            {
+                var InsertedPlayer =await _context.Players.FirstOrDefaultAsync(p => p.PlayerEmail == email && p.PlayerPassword == password);
+                await _context.SaveChangesAsync();
+                return InsertedPlayer;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
         }
 
-
+        public async Task<Player> GetWholeByIdAsync(int id)
+        {
+            try
+            {
+                Player ans = await _context.Players.Include(g => g.Games).ThenInclude(g => g.PGame).ThenInclude(g=>g.Subject).FirstOrDefaultAsync(g => g.PlayerID == id);
+                _context.ChangeTracker.Clear();
+                return ans;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
+        }
     }
 }

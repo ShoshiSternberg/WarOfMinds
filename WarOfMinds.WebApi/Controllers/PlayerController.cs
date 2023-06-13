@@ -37,6 +37,13 @@ namespace WarOfMinds.WebApi.Controllers
             return _playerService.GetByEmailAndPassword(email,password);
         }
 
+        // GET api/<PlayerController>/GetHistory/{id}
+        [HttpGet("GetHistory/{id}")]
+        public Task<List<GameDTO>> GetHistory(int id)
+        {
+            return _playerService.GetHistory(id);
+        }
+
         // POST api/<PlayerController>
         [HttpPost]
         public Task<PlayerDTO> Post([FromBody] PlayerDTO player)

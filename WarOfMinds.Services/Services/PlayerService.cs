@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using WarOfMinds.Common.DTO;
 using WarOfMinds.Repositories.Entities;
 using WarOfMinds.Repositories.Interfaces;
+using WarOfMinds.Repositories.Repositories;
 using WarOfMinds.Services.Interfaces;
 
 
@@ -70,9 +71,42 @@ namespace WarOfMinds.Services.Services
             }
 
         }
+        
+        public async Task<PlayerDTO> GetPlayerByIdInNewScopeAsync(int player)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var playerRepository = scope.ServiceProvider.GetRequiredService<IPlayerRepository>();
+                    return _mapper.Map<PlayerDTO>(await playerRepository.GetByIdAsync(player));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
+
+        }
+
         public async Task<PlayerDTO> GetByEmailAndPassword(string email, string password)
         {
             return _mapper.Map<PlayerDTO>(await _playerRepository.GetByEmailAndPassword(email, password));
+        }
+
+        public async Task<List<GameDTO>> GetHistory(int id)
+        {
+            try
+            {
+                PlayerDTO p = _mapper.Map<PlayerDTO>(await _playerRepository.GetWholeByIdAsync(id));
+                return p.Games.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
         }
     }
 }

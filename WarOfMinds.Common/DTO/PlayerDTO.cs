@@ -48,6 +48,14 @@ namespace WarOfMinds.Common.DTO
             set { dateOfRegistration = value; }
         }
 
+        private string playerAddress;
+
+        public string PlayerAddress
+        {
+            get { return playerAddress; }
+            set { playerAddress = value; }
+        }
+
         private int eloRating;
 
         public int ELORating

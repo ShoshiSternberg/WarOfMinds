@@ -55,6 +55,15 @@ namespace WarOfMinds.Repositories.Entities
             set { dateOfRegistration = value; }
         }
 
+        private string playerAddress;
+
+        public string PlayerAddress
+        {
+            get { return playerAddress; }
+            set { playerAddress = value; }
+        }
+
+
         private int eloRating;
 
         public int ELORating

@@ -16,5 +16,6 @@ namespace WarOfMinds.Repositories.Interfaces
         Task<Player> UpdateAsync(Player player);
         Task<Player> GetByEmailAndPassword(string name, string password);
         Task DeleteByIdAsync(int id);
+        Task<Player> GetWholeByIdAsync(int id);
     }
 }
