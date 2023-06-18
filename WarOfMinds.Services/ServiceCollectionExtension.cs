@@ -12,8 +12,6 @@ namespace WarOfMinds.Services
             services.AddRepositories();
             services.AddScoped<IGameService, GameService>();
             services.AddScoped<IPlayerService, PlayerService>();
-
-            services.AddScoped<ISubjectService, SubjectService>();
             services.AddScoped<IEloCalculator, EloCalculator>();
             services.AddSingleton<IDictionary<int, PlayerForCalcRating>>(opts => new Dictionary<int, PlayerForCalcRating>());
             

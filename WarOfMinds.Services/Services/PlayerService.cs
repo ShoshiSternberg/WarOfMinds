@@ -100,6 +100,8 @@ namespace WarOfMinds.Services.Services
             try
             {
                 PlayerDTO p = _mapper.Map<PlayerDTO>(await _playerRepository.GetWholeByIdAsync(id));
+                if (p.Games == null)
+                    return new List<GameDTO>();
                 return p.Games.ToList();
             }
             catch (Exception ex)

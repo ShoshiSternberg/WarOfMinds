@@ -20,7 +20,7 @@ namespace WarOfMinds.WebApi.SignalR
     {
         private readonly IGameService _gameService;
         private readonly IPlayerService _playerService;
-        private readonly ISubjectService _subjectService;
+        
         private readonly IEloCalculator _eloCalculator;
         private readonly IDictionary<string, UserConnection> _connections;
         private readonly IDictionary<string, GroupData> _groupData;
@@ -29,13 +29,12 @@ namespace WarOfMinds.WebApi.SignalR
 
 
 
-        public TriviaHub(IGameService gameService, IPlayerService playerService, ISubjectService subjectService,
+        public TriviaHub(IGameService gameService, IPlayerService playerService, 
             IEloCalculator eloCalculator, IDictionary<string, UserConnection> connections, IDictionary<string, GroupData> groupData,
             IHubContext<TriviaHub> hubContext, IConfiguration configuration)
         {
             _gameService = gameService;
-            _playerService = playerService;
-            _subjectService = subjectService;
+            _playerService = playerService;            
             _eloCalculator = eloCalculator;
             _connections = connections;
             _groupData = groupData;
@@ -46,22 +45,22 @@ namespace WarOfMinds.WebApi.SignalR
             GameStarted += async (sender, e) =>
             {
 
-                if (_groupData[$"game_{e.GameID}"].questions == null)
+                if (_groupData[$"game_{e.game.GameID}"].questions == null)
                 {//, the right difficulty
-                    await GetQuestionsAsync(e.GameID, e.SubjectID, "hard");
-                    await ExecuteAsync(e);
+                    await GetQuestionsAsync(e.game.GameID, e.SubjectId, "hard");
+                    await ExecuteAsync(e.game);
                 }
             };
 
         }
 
         //יצירה וטיפול באירוע של הפעלת למשחק
-        public delegate void GameEventHandler(object sender, GameDTO e);
+        public delegate void GameEventHandler(object sender, GroupData e);
 
         public event GameEventHandler GameStarted;
 
 
-        protected virtual void OnGameStarted(GameDTO e)
+        protected virtual void OnGameStarted(GroupData e)
         {
             GameStarted?.Invoke(this, e);
         }
@@ -69,14 +68,13 @@ namespace WarOfMinds.WebApi.SignalR
         
 
         // הצטרפות למשחק קיים
-        public async Task JoinExistingGameAsync(int playerId, int subjectId)
+        public async Task JoinExistingGameAsync(int playerId, string subject)
         {
-            PlayerDTO player = await _playerService.GetByIdAsync(playerId);
-            SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
+            PlayerDTO player = await _playerService.GetByIdAsync(playerId);            
             GameDTO game = await _gameService.FindActiveGameAsync(subject, player);
             if (game == null)
             {
-                await Clients.Caller.SendAsync("ReceiveMessage", $"there are not active game in subject {subject.Subjectname} with your rating.");
+                await Clients.Caller.SendAsync("ReceiveMessage", $"there are not active game in subject {subject} with your rating.");
 
             }
             if (_connections.Values.Any(p => (p.player == player) && (p.game == game.GameID)))
@@ -99,15 +97,12 @@ namespace WarOfMinds.WebApi.SignalR
         }
 
         // פתיחת חדר חדש
-        public async Task CreateNewGameAsync(int playerId, int subjectId)
+        public async Task CreateNewGameAsync(int playerId, string subject ,int subjectId)
         {
-            PlayerDTO player = await _playerService.GetByIdAsync(playerId);
-
+            PlayerDTO player = await _playerService.GetByIdAsync(playerId);           
             
-            SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
             GameDTO game = new GameDTO();
-            game.Subject = subject;
-            game.SubjectID = subjectId;
+            game.Subject = subject;            
             game.GameDate = DateTime.Now;
             game.Rating = player.ELORating;
             game.IsActive = true;
@@ -139,6 +134,7 @@ namespace WarOfMinds.WebApi.SignalR
                 {
                     _groupData[$"game_{game.GameID}"].GameManagerConnectionID = Context.ConnectionId;
                     _groupData[$"game_{game.GameID}"].game = game;
+                    _groupData[$"game_{game.GameID}"].SubjectId = subjectId;
                     await _gameService.UpdateGameAsync(game.GameID, _groupData[$"game_{game.GameID}"].game);
                 }
                 //לא צריך לנעול כי בכל מקרה זה מפתחות שונים              
@@ -155,16 +151,15 @@ namespace WarOfMinds.WebApi.SignalR
         }
 
         //הצטרפות לחדר המתנה
-        public async Task JoinWaitingRoomAsync(int playerId, int subjectId)
+        public async Task JoinWaitingRoomAsync(int playerId,string subject, int subjectId)
         {
             PlayerDTO player = await _playerService.GetByIdAsync(playerId);
-            SubjectDTO subject = await _subjectService.GetByIdAsync(subjectId);
             GameDTO game = await _gameService.FindOnHoldGameAsync(subject, player);
             if (game == null)
             {
-                await CreateNewGameAsync(playerId, subjectId);//אם לא מצאו חדר בהמתנה פותחים חדר חדש
+                await CreateNewGameAsync(playerId, subject,subjectId);//אם לא מצאו חדר בהמתנה פותחים חדר חדש
                 return;
-            }
+            } 
             else
             {
                 if (_connections.Values.Any(p => (p.player == player) && (p.game == game.GameID)))
@@ -191,13 +186,13 @@ namespace WarOfMinds.WebApi.SignalR
         public async Task StartGameByManager()
         {
 
-            GameDTO game = _groupData[$"game_{_connections[Context.ConnectionId].game}"].game;
+            GroupData game = _groupData[$"game_{_connections[Context.ConnectionId].game}"];
 
-            if (_groupData[$"game_{game.GameID}"].GameManagerConnectionID == Context.ConnectionId)
+            if (_groupData[$"game_{game.game.GameID}"].GameManagerConnectionID == Context.ConnectionId)
             {
-                _groupData[$"game_{game.GameID}"].IsActive = true;
-                game.OnHold = false;
-                await _gameService.UpdateGameAsync(game.GameID, game);
+                _groupData[$"game_{game.game.GameID}"].IsActive = true;
+                game.game.OnHold = false;
+                await _gameService.UpdateGameAsync(game.game.GameID, game.game);
                 OnGameStarted(game);
             }
 
@@ -254,11 +249,7 @@ namespace WarOfMinds.WebApi.SignalR
             }
 
         }
-        
-     
-
-
-
+           
         //מהלך המשחק
         public async Task ExecuteAsync(GameDTO game)
         {

@@ -15,7 +15,7 @@ namespace WarOfMinds.Repositories
         
         DbSet<Player> Players { get; set; }        
 
-        DbSet<Subject> Subjects { get; set; }
+        
         DbSet<GamePlayer> GamePlayer { get; set; }
         EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
         ChangeTracker ChangeTracker { get; }

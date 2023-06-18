@@ -35,14 +35,14 @@ namespace WarOfMinds.Repositories.Repositories
 
         public async Task<List<Game>> GetAllAsync()
         {
-            return await _context.Games.Include(g => g.Subject).ToListAsync();
+            return await _context.Games.ToListAsync();
         }
 
         public async Task<Game> GetByIdAsync(int id)
         {
             try
             {
-                return await _context.Games.Include(g => g.Subject).FirstOrDefaultAsync(g => g.GameID == id);
+                return await _context.Games.FirstOrDefaultAsync(g => g.GameID == id);
             }
             catch (Exception ex)
             {
@@ -55,11 +55,7 @@ namespace WarOfMinds.Repositories.Repositories
 
         public async Task<Game> AddGameAsync(Game game)
         {
-            if (game.Subject != null)
-            {
-                // attach the subject to the context
-                _context.Subjects.Attach(game.Subject);
-            }
+            
             var players = game.Players;
             List<GamePlayer> list = new List<GamePlayer>();
             foreach(GamePlayer p in players)
@@ -88,7 +84,7 @@ namespace WarOfMinds.Repositories.Repositories
             try
             {
                 // Get the game to update
-                Game existingGame = await _context.Games.Include(g => g.Subject).Include(g => g.Players).ThenInclude(g => g.GPlayer).FirstOrDefaultAsync(g => g.GameID == game.GameID);
+                Game existingGame = await _context.Games.Include(g => g.Players).ThenInclude(g => g.GPlayer).FirstOrDefaultAsync(g => g.GameID == game.GameID);
 
                 if (existingGame != null)
                 {
@@ -126,7 +122,7 @@ namespace WarOfMinds.Repositories.Repositories
 
         public async Task<Game> GetWholeByIdAsync(int id)
         {
-            Game ans = await _context.Games.Include(g => g.Subject).Include(g => g.Players).ThenInclude(g => g.GPlayer).FirstOrDefaultAsync(g => g.GameID == id);
+            Game ans = await _context.Games.Include(g => g.Players).ThenInclude(g => g.GPlayer).FirstOrDefaultAsync(g => g.GameID == id);
             _context.ChangeTracker.Clear();
             Console.WriteLine("GameRepository GetWholeByIdAsync:\n" + _context.ChangeTracker.DebugView.LongView);
             return ans;

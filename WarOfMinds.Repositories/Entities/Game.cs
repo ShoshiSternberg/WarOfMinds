@@ -22,17 +22,10 @@ namespace WarOfMinds.Repositories.Entities
             get { return gameID; }
             set { gameID = value; }
         }
-        private int subjectID;
 
-        public int SubjectID
-        {
-            get { return subjectID; }
-            set { subjectID = value; }
-        }
+        private string subject;
 
-        private Subject? subject;
-
-        public Subject Subject
+        public string Subject
         {
             get { return subject; }
             set {

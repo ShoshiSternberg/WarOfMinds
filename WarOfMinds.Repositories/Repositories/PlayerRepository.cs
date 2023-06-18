@@ -67,7 +67,7 @@ namespace WarOfMinds.Repositories.Repositories
         {
             try
             {
-                Player ans = await _context.Players.Include(g => g.Games).ThenInclude(g => g.PGame).ThenInclude(g=>g.Subject).FirstOrDefaultAsync(g => g.PlayerID == id);
+                Player ans = await _context.Players.Include(g => g.Games).ThenInclude(g => g.PGame).FirstOrDefaultAsync(g => g.PlayerID == id);
                 _context.ChangeTracker.Clear();
                 return ans;
             }

@@ -5,6 +5,7 @@ using System.Configuration;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using WarOfMinds.Common.DTO;
@@ -17,7 +18,7 @@ namespace WarOfMinds.Services
         public MappingProfile()
         {
 
-            CreateMap<SubjectDTO, Subject>().ReverseMap();
+            
 
             CreateMap<Player, PlayerDTO>()
                          .ForMember(d => d.Games, opt => opt.MapFrom(s => s.Games.Select(c => c.PGame)))
@@ -29,9 +30,8 @@ namespace WarOfMinds.Services
                                  GameLength = context.Mapper.Map<GameDTO>(gp.PGame).GameLength,
                                  IsActive = context.Mapper.Map<GameDTO>(gp.PGame).IsActive,
                                  OnHold = context.Mapper.Map<GameDTO>(gp.PGame).OnHold,
-                                 Rating = context.Mapper.Map<GameDTO>(gp.PGame).Rating,
-                                 Subject =context.Mapper.Map<SubjectDTO>( context.Mapper.Map<GameDTO>(gp.PGame).Subject),
-                                 SubjectID = context.Mapper.Map<GameDTO>(gp.PGame).SubjectID,
+                                 Rating = context.Mapper.Map<GameDTO>(gp.PGame).Rating,                                 
+                                 Subject = context.Mapper.Map<GameDTO>(gp.PGame).Subject,
                                  Players =new List<PlayerDTO>()
                              });
                              dest.Games = new HashSet<GameDTO>(games);
@@ -41,13 +41,10 @@ namespace WarOfMinds.Services
                          .Select(c => new GamePlayer { GameId = c.GameID, PlayerId = s.PlayerID })));
 
             CreateMap<GameDTO, Game>()
-            .ForMember(dest => dest.Subject, opt => opt.Ignore())
             .ForMember(dest => dest.Players, opt => opt.Ignore())
             .AfterMap((src, dest, context) =>
             {
-                var subject = context.Mapper.Map<Subject>(src.Subject);
-                dest.Subject = subject;
-
+                
                 var gamePlayers = src.Players.Select(p => new GamePlayer
                 {
                     PlayerId = p.PlayerID,
@@ -58,8 +55,7 @@ namespace WarOfMinds.Services
                 dest.Players = new HashSet<GamePlayer>(gamePlayers);
             });
 
-            CreateMap<Game, GameDTO>()
-            .ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Subject))
+            CreateMap<Game, GameDTO>()            
             .ForMember(dest => dest.Players, opt => opt.MapFrom(src => src.Players.Select(gp => gp.GPlayer)))
             .AfterMap((src, dest, context) =>
             {

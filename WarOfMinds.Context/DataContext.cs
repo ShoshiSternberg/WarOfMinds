@@ -17,8 +17,7 @@ namespace WarOfMinds.Context
     {
 
         public DbSet<Game> Games { get; set; }
-        public DbSet<Player> Players { get; set; }
-        public DbSet<Subject> Subjects { get; set; }
+        public DbSet<Player> Players { get; set; }        
         public DbSet<GamePlayer> GamePlayer { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
         : base(options)
@@ -39,10 +38,7 @@ namespace WarOfMinds.Context
             modelBuilder.Entity<Player>()
                             .Property(x => x.PlayerID)
                             .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-            modelBuilder.Entity<Subject>()
-                            .Property(x => x.SubjectID)
-                            .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
+            
             modelBuilder.Entity<GamePlayer>()
                 .HasKey(pg => new { pg.PlayerId, pg.GameId });
 

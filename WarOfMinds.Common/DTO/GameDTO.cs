@@ -16,19 +16,10 @@ namespace WarOfMinds.Common.DTO
             get { return gameID; }
             set { gameID = value; }
         }
-
-        [Required]
-        private int subjectID;
-
-        public int SubjectID
-        {
-            get { return subjectID; }
-            set { subjectID = value; }
-        }
         
-        private SubjectDTO? subject;
+        private string subject;
 
-        public SubjectDTO? Subject
+        public string Subject
         {
             get { return subject; }
             set { subject = value; }
