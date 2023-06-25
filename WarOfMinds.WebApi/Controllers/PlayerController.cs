@@ -25,9 +25,11 @@ namespace WarOfMinds.WebApi.Controllers
 
         // GET api/<PlayerController>/5
         [HttpGet("{id}")]
-        public Task<PlayerDTO> Get(int id)
+        public async Task<PlayerDTO> Get(int id)
         {
-            return _playerService.GetByIdAsync(id);
+            PlayerDTO p=await _playerService.GetByIdAsync(id);
+            p.PlayerPassword = "";
+            return p;
         }
         
         // GET api/<PlayerController>/{email}/{password}

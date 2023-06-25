@@ -52,34 +52,22 @@ namespace WarOfMinds.Services.Services
 
         private async Task Init(int gameID, List<PlayerDTO> playersSortedByScore, List<int> scores)
         {
-            if (playersSortedByScore.Count == 1)//אם שחקן משחק לבד, אפשר להניח שיש לו יריב וירטואלי עם דרוג זהה לדרוג הקודם שלו
-            {
-                PlayerDTO p = new PlayerDTO();
-                p.PlayerID = 0;
-                p.PlayerName = "virtual";
-                p.ELORating = playersSortedByScore[0].ELORating;
-                PlayerForCalcRating p1 = new PlayerForCalcRating(p, 0, 0);//אם הוא נכשל מול עצמו היריב הוירטואלי מקבל את כל הנקודות- מס השאלות כפול מספר השניות לכל שאלה
-                //if (scores[0] == 0)
-                //    p1.scoreForPlacementPosition = Convert.ToInt32(_TriviaHubConfiguration["NumOfQuestions"]) * Convert.ToInt32(_TriviaHubConfiguration["TimeToAnswer"]);
-                _players.Add(0, p1);
-            }
-
             GameDTO game = await _gameService.GetByIdInNewScopeAsync(gameID);//זה אמור להיות כל השחקנים מהדאטה בייס
             List<PlayerDTO> playersFromDB = game.Players.ToList<PlayerDTO>();
             for (int i = 0; i < playersFromDB.Count; i++)
             {
-                _players.Add(playersFromDB[i].PlayerID, new PlayerForCalcRating(playersFromDB[i], scores[i] , 0));
+                _players.Add(playersFromDB[i].PlayerID, new PlayerForCalcRating(playersFromDB[i], scores[i], 0));
             }
         }
 
 
         public async Task UpdateRatingOfAllPlayers(int gameID, List<PlayerDTO> playersSortedByScore, List<int> scores)
         {
-            await Init(gameID, playersSortedByScore,scores);
+            await Init(gameID, playersSortedByScore, scores);
             int NumOfPlayers = _players.Count;
             if (NumOfPlayers < 2)
             {
-                throw (new Exception("There are no players"));
+                return;
             }
             else
             {
@@ -124,11 +112,11 @@ namespace WarOfMinds.Services.Services
                 }
                 else
                 {
-                    for (int i = 1; i < playersSortedByScore.Count+1; i++)
+                    for (int i = 1; i < playersSortedByScore.Count + 1; i++)
                     {
-                        double score =(double) (NumOfPlayers - i) / (NumOfPlayers * (NumOfPlayers - 1) / 2);// _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition / ((NumOfPlayers * _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition) / 2);                       
+                        double score = (double)(NumOfPlayers - i) / (NumOfPlayers * (NumOfPlayers - 1) / 2);// _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition / ((NumOfPlayers * _players[playersSortedByScore[i].PlayerID].scoreForPlacementPosition) / 2);                       
 
-                        _players[playersSortedByScore[i-1].PlayerID].scoreForPlacementPosition = score;
+                        _players[playersSortedByScore[i - 1].PlayerID].scoreForPlacementPosition = score;
 
                     }
                 }

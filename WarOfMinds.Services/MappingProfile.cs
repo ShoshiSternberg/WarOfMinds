@@ -24,7 +24,7 @@ namespace WarOfMinds.Services
                          .ForMember(d => d.Games, opt => opt.MapFrom(s => s.Games.Select(c => c.PGame)))
                          .AfterMap((src, dest, context) =>
                          {
-                             var games = src.Games.Select(gp => new GameDTO {
+                             var games = src.Games!=null?src.Games.Select(gp => new GameDTO {
                                  GameID = gp.GameId,
                                  GameDate = context.Mapper.Map<GameDTO>(gp.PGame).GameDate,
                                  GameLength = context.Mapper.Map<GameDTO>(gp.PGame).GameLength,
@@ -33,7 +33,7 @@ namespace WarOfMinds.Services
                                  Rating = context.Mapper.Map<GameDTO>(gp.PGame).Rating,                                 
                                  Subject = context.Mapper.Map<GameDTO>(gp.PGame).Subject,
                                  Players =new List<PlayerDTO>()
-                             });
+                             }):new List<GameDTO>();
                              dest.Games = new HashSet<GameDTO>(games);
                          })
                          .ReverseMap()

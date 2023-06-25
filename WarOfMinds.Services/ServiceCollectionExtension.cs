@@ -14,10 +14,9 @@ namespace WarOfMinds.Services
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IEloCalculator, EloCalculator>();
             services.AddSingleton<IDictionary<int, PlayerForCalcRating>>(opts => new Dictionary<int, PlayerForCalcRating>());
-            
+
             services.AddAutoMapper(typeof(MappingProfile));
-            //מה זה
-            //services.AddMemoryCache();
+            
 
             return services;
         }

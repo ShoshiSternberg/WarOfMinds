@@ -29,7 +29,7 @@ namespace WarOfMinds.Services.Services
         }
 
         public async Task<PlayerDTO> AddAsync(PlayerDTO Player)
-        {
+        {           
             return _mapper.Map<PlayerDTO>(await _playerRepository.AddAsync(_mapper.Map<Player>(Player)));
         }
 

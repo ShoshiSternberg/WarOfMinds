@@ -11,6 +11,7 @@ namespace WarOfMinds.WebApi.SignalR
         public List<AnswerResult> gameResults { get; set; }//ליסט של תשובות- הוא מתרוקן בסיום כל שאלה.
         public bool IsTimeOver { get; set; }
         public int RightAnswers { get; set; } = 0;
+        public int NumOfPlayers { get; set; } = 0;
         public int SubjectId { get; set; }
     }
 }

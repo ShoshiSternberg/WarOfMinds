@@ -19,6 +19,8 @@ namespace WarOfMinds.Repositories.Repositories
 
         public async Task<Player> AddAsync(Player Player)
         {
+            if (await _context.Players.FirstOrDefaultAsync(p => p.PlayerEmail == Player.PlayerEmail && p.PlayerPassword == Player.PlayerPassword) != null)
+                return null;
             var addedPlayer = await _context.Players.AddAsync(Player);
             await _context.SaveChangesAsync();
             return addedPlayer.Entity;
