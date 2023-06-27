@@ -411,7 +411,7 @@ namespace WarOfMinds.WebApi.SignalR
 
                 List<PlayerDTO> players = await TopPlayers(gameId, int.MaxValue);
                 List<int> scores = players.Select(p => GetUserConnectionByPlayerID(p).score).ToList();
-                _eloCalculator.UpdateRatingOfAllPlayers(gameId, players, scores);
+                await _eloCalculator.UpdateRatingOfAllPlayers(gameId, players, scores);
                 //עדכון מצב המשחק ללא פעיל
                 _groupData[$"game_{gameId}"].game.IsActive = false;
                 await _gameService.UpdateGameInNewScopeAsync(_groupData[$"game_{gameId}"].game);

@@ -152,25 +152,11 @@ namespace WarOfMinds.Services.Services
             game = await GetWholeByIdAsync(game.GameID);
             if (!game.Players.Any(p => p.PlayerID == player.PlayerID))
                 game.Players.Add(player);
-
+            game.Rating = (game.Rating + player.ELORating) / game.Players.Count;
             game = await UpdateGameAsync(game.GameID, game);
             return await GetWholeByIdAsync(game.GameID);
         }
-        //עדכון דירוג המשחק
-        public async Task UpdateRating(GameDTO game, int newPlayerRating)
-        {
-            try
-            {
-                //ממוצע של דירוגי השחקנים
-                int NumOfPlayers = game.Players.Count;
-                game.Rating = (game.Rating + newPlayerRating) / NumOfPlayers + 1;
-                await UpdateGameAsync(game.GameID, game);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-        }
+
        
         public async Task<GameDTO> FindActiveGameAsync(string subject, PlayerDTO player)
         {
@@ -189,7 +175,7 @@ namespace WarOfMinds.Services.Services
             game = await GetWholeByIdAsync(game.GameID);
             if (!game.Players.Any(p => p.PlayerID == player.PlayerID))
                 game.Players.Add(player);
-
+            game.Rating=(game.Rating+player.ELORating)/game.Players.Count;
             game = await UpdateGameAsync(game.GameID, game);
             return await GetWholeByIdAsync(game.GameID);
 

@@ -15,7 +15,7 @@ namespace WarOfMinds.WebApi.Controllers
         {
             _playerService = playerService;
         }
-    
+
         // GET: api/<PlayerController>
         [HttpGet]
         public Task<List<PlayerDTO>> Get()
@@ -27,16 +27,17 @@ namespace WarOfMinds.WebApi.Controllers
         [HttpGet("{id}")]
         public async Task<PlayerDTO> Get(int id)
         {
-            PlayerDTO p=await _playerService.GetByIdAsync(id);
-            p.PlayerPassword = "";
+            PlayerDTO p = await _playerService.GetByIdAsync(id);
+            if (p != null)
+                p.PlayerPassword = "";
             return p;
         }
-        
+
         // GET api/<PlayerController>/{email}/{password}
         [HttpGet("{email}/{password}")]
-        public Task<PlayerDTO> Get(string email,string password)
+        public Task<PlayerDTO> Get(string email, string password)
         {
-            return _playerService.GetByEmailAndPassword(email,password);
+            return _playerService.GetByEmailAndPassword(email, password);
         }
 
         // GET api/<PlayerController>/GetHistory/{id}
@@ -55,8 +56,9 @@ namespace WarOfMinds.WebApi.Controllers
 
         // PUT api/<PlayerController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<PlayerDTO> PutAsync(int id, [FromBody] PlayerDTO value)
         {
+            return await _playerService.UpdateAsync(value);
         }
 
         // DELETE api/<PlayerController>/5
